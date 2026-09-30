@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">mrs-tango</string>
+    <string name="title">Judul project ini terinspirasi dari produk ini yang merupakan snack wafer
+    dengan rasa yang lezat dan populer</string>
+    <string name="ingredients">Komposisi produk:
+
+    Tepung terigu, Gula, Lemak Reroti Nabati (Mengandung Antioksidan Askorbil Palmitat dan Tokoferol),
+    Minyak nabati, Tepung telur, Garam.</string>
+</resources>
