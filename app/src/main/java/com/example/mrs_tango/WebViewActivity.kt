@@ -2,6 +2,7 @@ package com.example.mrs_tango
 
 import android.os.Bundle
 import android.view.MenuItem
+import android.webkit.WebViewClient
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -10,7 +11,7 @@ import com.example.mrs_tango.databinding.ActivityWebViewBinding
 
 class WebViewActivity : AppCompatActivity() {
 
-    private lateinit var binding : ActivityWebViewBinding
+    private lateinit var binding: ActivityWebViewBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,7 +28,15 @@ class WebViewActivity : AppCompatActivity() {
             setDisplayShowHomeEnabled(true)
         }
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        binding.webView.apply {
+            webViewClient = WebViewClient()
+            webChromeClient = android.webkit.WebChromeClient() // Tambahkan baris ini
+            settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
+            loadUrl("https://www.playstation.com/en-id/")
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
@@ -40,7 +49,6 @@ class WebViewActivity : AppCompatActivity() {
                 onBackPressedDispatcher.onBackPressed()
                 true
             }
-
             else -> super.onOptionsItemSelected(item)
         }
     }

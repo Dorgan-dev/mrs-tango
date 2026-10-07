@@ -26,6 +26,8 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.apply {
             title = "Izireps"
             subtitle = "Booking playstation lebih mudah"
+            setHomeAsUpIndicator(R.drawable.logo_izireps)
+            setDisplayHomeAsUpEnabled(true)
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
