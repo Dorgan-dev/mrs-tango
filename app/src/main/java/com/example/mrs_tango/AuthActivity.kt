@@ -1,11 +1,13 @@
 package com.example.mrs_tango
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.mrs_tango.databinding.ActivityAuthBinding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class AuthActivity : AppCompatActivity() {
 
@@ -22,6 +24,30 @@ class AuthActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+
+        val sharedPref = getSharedPreferences("user_pref", MODE_PRIVATE)
+
+        binding.btnLogin.setOnClickListener {
+            val username = binding.inputUsername.text.toString()
+            val password = binding.inputPassword.text.toString()
+
+            if (username.isNotEmpty() && username == password) {
+                val editor = sharedPref.edit()
+                editor.putBoolean("isLogin", true)
+                editor.putString("username", username)
+                editor.apply()
+
+                val intent = Intent(this@AuthActivity, MainActivity::class.java)
+                startActivity(intent)
+                finish()
+            } else {
+                MaterialAlertDialogBuilder(this)
+                    .setTitle("Login gagal")
+                    .setMessage("Silahkan coba lagi")
+                    .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+                    .show()
+            }
         }
     }
 }
