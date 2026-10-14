@@ -16,7 +16,6 @@ class ProjectActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Perbaikan inisialisasi binding
         binding = ActivityProjectBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
