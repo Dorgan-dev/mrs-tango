@@ -7,7 +7,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import com.example.mrs_tango.About.AboutFragment
 import com.example.mrs_tango.Home.HomeFragment
+import com.example.mrs_tango.Notification.NotificationFragment
+import com.example.mrs_tango.Profile.ProfileFragment
+import com.example.mrs_tango.Schedule.ScheduleFragment
 import com.example.mrs_tango.databinding.ActivityBaseBinding
 
 class BaseActivity : AppCompatActivity() {
@@ -52,6 +56,19 @@ class BaseActivity : AppCompatActivity() {
             when (it.itemId) {
                 R.id.home -> {
                     replaceFragment(HomeFragment())
+                    true
+                }
+                R.id.about -> {
+                    replaceFragment(AboutFragment())
+                    true
+                }R.id.schedule -> {
+                    replaceFragment(ScheduleFragment())
+                    true
+                }R.id.notification -> {
+                    replaceFragment(NotificationFragment())
+                    true
+                }R.id.profile -> {
+                    replaceFragment(ProfileFragment())
                     true
                 }
                 else ->false
