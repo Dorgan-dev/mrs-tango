@@ -40,7 +40,6 @@ class ProjectActivity : AppCompatActivity() {
                 onBackPressedDispatcher.onBackPressed()
                 true
             }
-
             else -> super.onOptionsItemSelected(item)
         }
     }
