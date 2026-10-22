@@ -28,11 +28,23 @@ class AuthActivity : AppCompatActivity() {
 
         val sharedPref = getSharedPreferences("user_pref", MODE_PRIVATE)
 
+        // Tombol Login
         binding.btnLogin.setOnClickListener {
-            val username = binding.inputUsername.text.toString()
-            val password = binding.inputPassword.text.toString()
+            val username = binding.inputUsername.text.toString().trim()
+            val password = binding.inputPassword.text.toString().trim()
 
-            if (username.isNotEmpty() && username == password) {
+            val isRegistered = sharedPref.getBoolean("is_registered", false)
+            val regUsername = sharedPref.getString("registered_username", "") ?: ""
+            val regPassword = sharedPref.getString("registered_password", "") ?: ""
+
+            // Rule 1: Jika username == password -> Boleh Login
+            val isRule1Valid = username.isNotEmpty() && username == password
+
+            // Rule 2: Jika username == username di SharedPreferences dan password == password di SharedPreferences -> Boleh Login
+            val isRule2Valid = isRegistered && username.isNotEmpty() && password.isNotEmpty() &&
+                    username == regUsername && password == regPassword
+
+            if (isRule1Valid || isRule2Valid) {
                 val editor = sharedPref.edit()
                 editor.putBoolean("isLogin", true)
                 editor.putString("username", username)
@@ -44,10 +56,16 @@ class AuthActivity : AppCompatActivity() {
             } else {
                 MaterialAlertDialogBuilder(this)
                     .setTitle("Login gagal")
-                    .setMessage("Silahkan coba lagi")
+                    .setMessage("Username atau password salah. Silakan coba lagi atau daftarkan akun baru.")
                     .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
                     .show()
             }
+        }
+
+        // Tombol Registrasi Akun Baru
+        binding.btnRegister.setOnClickListener {
+            val intent = Intent(this@AuthActivity, RegisterActivity::class.java)
+            startActivity(intent)
         }
     }
 }
