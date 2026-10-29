@@ -9,10 +9,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mrs_tango.AuthActivity
+import com.example.mrs_tango.Console
+import com.example.mrs_tango.ConsoleAdapter
 import com.example.mrs_tango.ProfileActivity
-import com.example.mrs_tango.ProjectActivity
 import com.example.mrs_tango.R
-import com.example.mrs_tango.WebViewActivity
 import com.example.mrs_tango.databinding.FragmentHomeBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
@@ -20,10 +20,13 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
+    // Penampung data dummy
+    private val list = ArrayList<Console>()
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
@@ -35,15 +38,11 @@ class HomeFragment : Fragment() {
             title = "Home"
         }
 
-        binding.btnMyProject.setOnClickListener {
-            val intent = Intent(requireContext(), ProjectActivity::class.java)
-            startActivity(intent)
-        }
-
-        binding.btnToWebView.setOnClickListener {
-            val intent = Intent(requireContext(), WebViewActivity::class.java)
-            startActivity(intent)
-        }
+        // --- Inisialisasi RecyclerView ---
+        binding.rvConsoles.setHasFixedSize(true)
+        list.addAll(getDummyData())
+        showRecyclerGrid()
+        // ---------------------------------
 
         binding.btnLogout.setOnClickListener {
             val sharedPref = requireContext().getSharedPreferences("user_pref", MODE_PRIVATE)
@@ -71,5 +70,35 @@ class HomeFragment : Fragment() {
             val i = Intent(requireContext(), ProfileActivity::class.java)
             startActivity(i)
         }
+    }
+
+    private fun getDummyData(): ArrayList<Console> {
+        val dataName = arrayOf("PlayStation 3", "PlayStation 4", "PlayStation 5", "PS VR")
+        val dataPrice = arrayOf("Rp 5.000 / Jam", "Rp 10.000 / Jam", "Rp 15.000 / Jam", "Rp 25.000 / Jam")
+
+        // Ganti R.drawable.ic_launcher_background dengan gambar PS asli Anda (misal: R.drawable.gambar_ps3)
+        val dataPhoto = intArrayOf(
+            R.drawable.ps5_u1,
+            R.drawable.ic_launcher_background,
+            R.drawable.ic_launcher_background,
+            R.drawable.ic_launcher_background
+        )
+
+        val listConsole = ArrayList<Console>()
+        for (i in dataName.indices) {
+            val console = Console("ID_${i+1}", dataName[i], dataPrice[i], dataPhoto[i])
+            listConsole.add(console)
+        }
+        return listConsole
+    }
+
+    private fun showRecyclerGrid() {
+        val consoleAdapter = ConsoleAdapter(list)
+        binding.rvConsoles.adapter = consoleAdapter
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null // Mencegah memory leak
     }
 }
