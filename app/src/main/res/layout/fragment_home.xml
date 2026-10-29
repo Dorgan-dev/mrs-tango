@@ -19,7 +19,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnLogout"
-        tools:listitem="@layout/console_card" />
+        tools:listitem="@layout/console_card"
+        android:padding="8dp"
+        android:clipToPadding="false"/>
     <!-- tools:listitem berfungsi agar Anda bisa melihat preview kartu di Android Studio -->
 
     <androidx.appcompat.widget.Toolbar

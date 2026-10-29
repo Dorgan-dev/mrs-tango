@@ -9,8 +9,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mrs_tango.AuthActivity
-import com.example.mrs_tango.Console
-import com.example.mrs_tango.ConsoleAdapter
+import com.example.mrs_tango.DummyData.Console
+import com.example.mrs_tango.DummyData.ConsoleAdapter
 import com.example.mrs_tango.ProfileActivity
 import com.example.mrs_tango.R
 import com.example.mrs_tango.databinding.FragmentHomeBinding
@@ -73,12 +73,13 @@ class HomeFragment : Fragment() {
     }
 
     private fun getDummyData(): ArrayList<Console> {
-        val dataName = arrayOf("PlayStation 3", "PlayStation 4", "PlayStation 5", "PS VR")
-        val dataPrice = arrayOf("Rp 5.000 / Jam", "Rp 10.000 / Jam", "Rp 15.000 / Jam", "Rp 25.000 / Jam")
+        val dataName = arrayOf("PlayStation 3", "PlayStation 4", "PlayStation 5", "PS VR", "ps gue")
+        val dataPrice = arrayOf("Rp 5.000 / Jam", "Rp 10.000 / Jam", "Rp 15.000 / Jam", "Rp 25.000 / Jam", "Rp 21.000 / Jam")
 
         // Ganti R.drawable.ic_launcher_background dengan gambar PS asli Anda (misal: R.drawable.gambar_ps3)
         val dataPhoto = intArrayOf(
             R.drawable.ps5_u1,
+            R.drawable.ic_launcher_background,
             R.drawable.ic_launcher_background,
             R.drawable.ic_launcher_background,
             R.drawable.ic_launcher_background
