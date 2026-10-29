@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.mrs_tango.AuthActivity
 import com.example.mrs_tango.DummyData.Console
 import com.example.mrs_tango.DummyData.ConsoleAdapter
+import com.example.mrs_tango.Home.ConsoleDetail.DetailConsoleFragment
 import com.example.mrs_tango.ProfileActivity
 import com.example.mrs_tango.R
 import com.example.mrs_tango.databinding.FragmentHomeBinding
@@ -94,7 +95,20 @@ class HomeFragment : Fragment() {
     }
 
     private fun showRecyclerGrid() {
-        val consoleAdapter = ConsoleAdapter(list)
+        val consoleAdapter = ConsoleAdapter(list) { selectedConsole ->
+            // Buat instance DetailFragment dan kirim data console
+            val detailFragment = DetailConsoleFragment().apply {
+                arguments = Bundle().apply {
+                    putSerializable("EXTRA_CONSOLE", selectedConsole)
+                }
+            }
+
+            // Pindah Fragment
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, detailFragment) // Ganti R.id.fragment_container sesuai ID FrameLayout/FragmentContainerView di Activity utama Anda
+                .addToBackStack(null)
+                .commit()
+        }
         binding.rvConsoles.adapter = consoleAdapter
     }
 

@@ -8,10 +8,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mrs_tango.R
 
-class ConsoleAdapter(private val listConsole: ArrayList<Console>) : RecyclerView.Adapter<ConsoleAdapter.ListViewHolder>() {
+class ConsoleAdapter(
+    private val listConsole: ArrayList<Console>,
+    private val onItemClick: (Console) -> Unit // Tambahkan callback ini
+) : RecyclerView.Adapter<ConsoleAdapter.ListViewHolder>() {
 
     class ListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        // Pastikan ID ini sama dengan yang ada di console_card.xml Anda
         val imgPhoto: ImageView = itemView.findViewById(R.id.img_console)
         val tvName: TextView = itemView.findViewById(R.id.tv_console_name)
         val tvPrice: TextView = itemView.findViewById(R.id.tv_console_price)
@@ -23,15 +25,13 @@ class ConsoleAdapter(private val listConsole: ArrayList<Console>) : RecyclerView
     }
 
     override fun onBindViewHolder(holder: ListViewHolder, position: Int) {
-        val (id, name, price, imagePhoto) = listConsole[position]
+        val console = listConsole[position]
+        holder.imgPhoto.setImageResource(console.imagePhoto)
+        holder.tvName.text = console.name
+        holder.tvPrice.text = console.price
 
-        holder.imgPhoto.setImageResource(imagePhoto)
-        holder.tvName.text = name
-        holder.tvPrice.text = price
-
-        holder.itemView.setOnClickListener {
-            // Logika klik untuk pindah ke DetailFragment akan diletakkan di sini
-        }
+        // Panggil callback saat item diklik
+        holder.itemView.setOnClickListener { onItemClick(console) }
     }
 
     override fun getItemCount(): Int = listConsole.size
