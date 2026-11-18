@@ -1,5 +1,6 @@
 package com.example.mrs_tango.DummyData
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,8 +10,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.mrs_tango.R
 
 class ConsoleAdapter(
-    private val listConsole: ArrayList<Console>,
-    private val onItemClick: (Console) -> Unit // Tambahkan callback ini
+    private val listConsole: ArrayList<ConsoleModel>,
+    private val onItemClick: (ConsoleModel) -> Unit // Tambahkan callback ini
 ) : RecyclerView.Adapter<ConsoleAdapter.ListViewHolder>() {
 
     class ListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -32,6 +33,7 @@ class ConsoleAdapter(
 
         // Panggil callback saat item diklik
         holder.itemView.setOnClickListener { onItemClick(console) }
+        Log.e("output", console.name)
     }
 
     override fun getItemCount(): Int = listConsole.size

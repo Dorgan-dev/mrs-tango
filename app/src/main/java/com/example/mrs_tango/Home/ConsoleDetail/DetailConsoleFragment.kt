@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.example.mrs_tango.DummyData.Console
+import com.example.mrs_tango.DummyData.ConsoleModel
 import com.example.mrs_tango.databinding.FragmentDetailConsoleBinding
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
@@ -44,7 +44,7 @@ class DetailConsoleFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Ambil data konsol dari arguments
-        val console = arguments?.getSerializable("EXTRA_CONSOLE") as? Console
+        val console = arguments?.getSerializable("EXTRA_CONSOLE") as? ConsoleModel
         console?.let {
             binding.imgDetail.setImageResource(it.imagePhoto)
             binding.tvDetailName.text = it.name

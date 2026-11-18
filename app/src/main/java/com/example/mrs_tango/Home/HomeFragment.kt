@@ -8,8 +8,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.GridLayoutManager
 import com.example.mrs_tango.AuthActivity
-import com.example.mrs_tango.DummyData.Console
+import com.example.mrs_tango.DummyData.ConsoleModel
 import com.example.mrs_tango.DummyData.ConsoleAdapter
 import com.example.mrs_tango.Home.ConsoleDetail.DetailConsoleFragment
 import com.example.mrs_tango.ProfileActivity
@@ -21,29 +22,96 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    // Penampung data dummy
-    private val list = ArrayList<Console>()
+    // Parameter disesuaikan: (ID, Nama, Harga, Gambar Resource)
+    private val consoleList = listOf(
+        ConsoleModel("ID_1", "PlayStation 1", "Rp 3.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_2", "PlayStation 2", "Rp 4.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_3", "PlayStation 3", "Rp 5.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_4", "PlayStation 4", "Rp 10.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_5", "PlayStation 4 Pro", "Rp 12.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_6", "PlayStation 5", "Rp 15.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_7", "PlayStation 5 Digital", "Rp 14.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_8", "PS VR", "Rp 25.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_9", "PS VR 2", "Rp 35.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_10", "PSP", "Rp 5.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_11", "PS Vita", "Rp 7.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_12", "Xbox Original", "Rp 4.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_13", "Xbox 360", "Rp 5.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_14", "Xbox One", "Rp 9.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_15", "Xbox One S", "Rp 10.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_16", "Xbox One X", "Rp 12.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_17", "Xbox Series S", "Rp 14.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_18", "Xbox Series X", "Rp 16.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_19", "Xbox Kinect Sensor", "Rp 8.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_20", "Nintendo NES", "Rp 3.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_21", "Super Nintendo (SNES)", "Rp 4.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_22", "Nintendo 64", "Rp 5.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_23", "Nintendo GameCube", "Rp 6.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_24", "Nintendo Wii", "Rp 7.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_25", "Nintendo Wii U", "Rp 8.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_26", "Nintendo Switch V1", "Rp 10.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_27", "Nintendo Switch V2", "Rp 12.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_28", "Nintendo Switch Lite", "Rp 8.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_29", "Nintendo Switch OLED", "Rp 15.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_30", "Game Boy Advance", "Rp 4.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_31", "Nintendo DS", "Rp 5.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_32", "Nintendo 3DS", "Rp 7.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_33", "Sega Genesis", "Rp 4.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_34", "Sega Dreamcast", "Rp 6.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_35", "Steam Deck 64GB", "Rp 15.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_36", "Steam Deck 256GB", "Rp 18.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_37", "Steam Deck 512GB", "Rp 20.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_38", "Steam Deck OLED", "Rp 25.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_39", "ASUS ROG Ally Z1", "Rp 22.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_40", "ASUS ROG Ally Extreme", "Rp 26.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_41", "Lenovo Legion Go", "Rp 25.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_42", "Meta Quest 2", "Rp 20.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_43", "Meta Quest 3", "Rp 30.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_44", "Meta Quest Pro", "Rp 40.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_45", "HTC Vive", "Rp 25.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_46", "Valve Index", "Rp 35.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_47", "Pico 4 VR", "Rp 22.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_48", "Arcade Machine Retro", "Rp 10.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_49", "Racing Simulator G29", "Rp 30.000 / Jam", R.drawable.ic_launcher_background),
+        ConsoleModel("ID_50", "Flight Simulator Setup", "Rp 35.000 / Jam", R.drawable.ic_launcher_background)
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Inflate the layout for this fragment
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         (requireActivity() as AppCompatActivity).setSupportActionBar(binding.toolbar)
         (requireActivity() as AppCompatActivity).supportActionBar?.apply {
             title = "Home"
         }
 
-        // --- Inisialisasi RecyclerView ---
-        binding.rvConsoles.setHasFixedSize(true)
-        list.addAll(getDummyData())
-        showRecyclerGrid()
-        // ---------------------------------
+        // --- Inisialisasi Adapter dan RecyclerView ---
+        val consoleAdapter = ConsoleAdapter(ArrayList(consoleList)) { selectedConsole ->
+            val detailFragment = DetailConsoleFragment().apply {
+                arguments = Bundle().apply {
+                    putSerializable("EXTRA_CONSOLE", selectedConsole)
+                }
+            }
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, detailFragment)
+                .addToBackStack(null)
+                .commit()
+        }
+
+        binding.rvConsoles.apply {
+            setHasFixedSize(true)
+            // Tambahkan baris di bawah jika ingin tampilannya Grid (2 kolom)
+            // layoutManager = GridLayoutManager(requireContext(), 2)
+            adapter = consoleAdapter
+        }
+        // -----------------------------------------------------------
 
         binding.btnLogout.setOnClickListener {
             val sharedPref = requireContext().getSharedPreferences("user_pref", MODE_PRIVATE)
@@ -73,47 +141,8 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun getDummyData(): ArrayList<Console> {
-        val dataName = arrayOf("PlayStation 3", "PlayStation 4", "PlayStation 5", "PS VR", "ps gue")
-        val dataPrice = arrayOf("Rp 5.000 / Jam", "Rp 10.000 / Jam", "Rp 15.000 / Jam", "Rp 25.000 / Jam", "Rp 21.000 / Jam")
-
-        // Ganti R.drawable.ic_launcher_background dengan gambar PS asli Anda (misal: R.drawable.gambar_ps3)
-        val dataPhoto = intArrayOf(
-            R.drawable.ps5_u1,
-            R.drawable.ic_launcher_background,
-            R.drawable.ic_launcher_background,
-            R.drawable.ic_launcher_background,
-            R.drawable.ic_launcher_background
-        )
-
-        val listConsole = ArrayList<Console>()
-        for (i in dataName.indices) {
-            val console = Console("ID_${i+1}", dataName[i], dataPrice[i], dataPhoto[i])
-            listConsole.add(console)
-        }
-        return listConsole
-    }
-
-    private fun showRecyclerGrid() {
-        val consoleAdapter = ConsoleAdapter(list) { selectedConsole ->
-            // Buat instance DetailFragment dan kirim data console
-            val detailFragment = DetailConsoleFragment().apply {
-                arguments = Bundle().apply {
-                    putSerializable("EXTRA_CONSOLE", selectedConsole)
-                }
-            }
-
-            // Pindah Fragment
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, detailFragment) // Ganti R.id.fragment_container sesuai ID FrameLayout/FragmentContainerView di Activity utama Anda
-                .addToBackStack(null)
-                .commit()
-        }
-        binding.rvConsoles.adapter = consoleAdapter
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null // Mencegah memory leak
+        _binding = null
     }
 }
