@@ -1,12 +1,17 @@
 package com.example.mrs_tango.Schedule
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mrs_tango.R
+import com.example.mrs_tango.Schedule.Tutorial.TutorialMessageActivity
 import com.example.mrs_tango.databinding.FragmentScheduleBinding
 
 class ScheduleFragment : Fragment() {
@@ -25,6 +30,22 @@ class ScheduleFragment : Fragment() {
         (requireActivity() as AppCompatActivity).setSupportActionBar(binding.toolbar)
         (requireActivity() as AppCompatActivity).supportActionBar?.apply {
             title = "Schdule"
+        }
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.schedule_toolbar_menu, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_tutorial -> {
+                val intent = Intent(requireContext(), TutorialMessageActivity::class.java)
+                startActivity(intent)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 }
