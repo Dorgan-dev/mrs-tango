@@ -7,6 +7,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".Home.HomeFragment">
 
+    <View
+        android:id="@+id/background_header"
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        android:backgroundTint="@color/dark_green"
+        android:background="@drawable/bg_header_wave"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
     <!-- Ini keranjang untuk menampilkan daftar kartu -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_consoles"
