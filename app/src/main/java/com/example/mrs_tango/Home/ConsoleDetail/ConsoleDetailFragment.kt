@@ -5,10 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import com.example.mrs_tango.DummyData.ConsoleModel
-import com.example.mrs_tango.databinding.FragmentDetailConsoleBinding
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.example.mrs_tango.databinding.FragmentConsoleDetailBinding
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
@@ -17,31 +18,44 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
-class DetailConsoleFragment : Fragment() {
+class ConsoleDetailFragment : BottomSheetDialogFragment() {
 
-    private var _binding: FragmentDetailConsoleBinding? = null
+    private var _binding: FragmentConsoleDetailBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentDetailConsoleBinding.inflate(inflater, container, false)
+        _binding = FragmentConsoleDetailBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        (requireActivity() as AppCompatActivity).setSupportActionBar(binding.toolbar)
-        (requireActivity() as AppCompatActivity).supportActionBar?.apply {
-            title = "Detail console"
-            setDisplayHomeAsUpEnabled(true)
-        }
-
-        binding.toolbar.setNavigationOnClickListener {
-            parentFragmentManager.popBackStack() // Perintah untuk kembali ke HomeFragment
-        }
-
         super.onViewCreated(view, savedInstanceState)
+
+        // Konfigurasi agar Full Screen dan Trans   paran (supaya lengkungan terlihat)
+        dialog?.setOnShowListener { dialogInterface ->
+            val bottomSheetDialog = dialogInterface as BottomSheetDialog
+            val bottomSheet = bottomSheetDialog.findViewById<View>(
+                com.google.android.material.R.id.design_bottom_sheet
+            )
+
+            bottomSheet?.let {
+                // Hapus background bawaan sistem yang kotak
+                it.setBackgroundResource(android.R.color.transparent)
+
+                // Ubah tinggi bottom sheet menjadi setinggi layar (Match Parent)
+                val layoutParams = it.layoutParams
+                layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+                it.layoutParams = layoutParams
+
+                // Paksa statusnya menjadi otomatis terbuka penuh (Expanded)
+                val behavior = BottomSheetBehavior.from(it)
+                behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                behavior.skipCollapsed = true // Mencegah tersangkut di tengah saat di-swipe ke bawah
+            }
+        }
 
         // Ambil data konsol dari arguments
         val console = arguments?.getSerializable("EXTRA_CONSOLE") as? ConsoleModel

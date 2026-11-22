@@ -1,4 +1,4 @@
-package com.example.mrs_tango.Home
+package com.example.mrs_tango.Home // Sesuaikan package jika berbeda
 
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.example.mrs_tango.AuthActivity
 import com.example.mrs_tango.DummyData.ConsoleModel
 import com.example.mrs_tango.DummyData.ConsoleAdapter
-import com.example.mrs_tango.Home.ConsoleDetail.DetailConsoleFragment
+import com.example.mrs_tango.Home.ConsoleDetail.ConsoleDetailFragment // Pastikan import ini benar
 import com.example.mrs_tango.ProfileActivity
 import com.example.mrs_tango.R
 import com.example.mrs_tango.databinding.FragmentHomeBinding
@@ -22,7 +22,6 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    // Parameter disesuaikan: (ID, Nama, Harga, Gambar Resource)
     private val consoleList = listOf(
         ConsoleModel("ID_1", "PlayStation 1", "Rp 3.000 / Jam", R.drawable.ic_launcher_background),
         ConsoleModel("ID_2", "PlayStation 2", "Rp 4.000 / Jam", R.drawable.ic_launcher_background),
@@ -94,15 +93,14 @@ class HomeFragment : Fragment() {
 
         // --- Inisialisasi Adapter dan RecyclerView ---
         val consoleAdapter = ConsoleAdapter(ArrayList(consoleList)) { selectedConsole ->
-            val detailFragment = DetailConsoleFragment().apply {
+            val detailFragment = ConsoleDetailFragment().apply {
                 arguments = Bundle().apply {
                     putSerializable("EXTRA_CONSOLE", selectedConsole)
                 }
             }
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, detailFragment)
-                .addToBackStack(null)
-                .commit()
+
+            // CARA BARU MEMANGGIL BOTTOM SHEET
+            detailFragment.show(parentFragmentManager, "DetailBottomSheet")
         }
 
         binding.rvConsoles.apply {
