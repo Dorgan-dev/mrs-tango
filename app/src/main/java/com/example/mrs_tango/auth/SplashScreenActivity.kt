@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import com.example.mrs_tango.BaseActivity
+import com.example.mrs_tango.customer.BaseActivity
 import com.example.mrs_tango.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

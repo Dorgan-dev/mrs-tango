@@ -1,4 +1,4 @@
-package com.example.mrs_tango.Schedule.Tutorial
+package com.example.mrs_tango.customer.schedule.Tutorial
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge

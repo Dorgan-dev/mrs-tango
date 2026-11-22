@@ -1,4 +1,4 @@
-package com.example.mrs_tango.Profile
+package com.example.mrs_tango.customer.notification
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -6,12 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import com.example.mrs_tango.R
-import com.example.mrs_tango.databinding.FragmentHomeBinding
-import com.example.mrs_tango.databinding.FragmentProfileBinding
+import com.example.mrs_tango.databinding.FragmentNotificationBinding
 
-class ProfileFragment : Fragment() {
-    private var _binding: FragmentProfileBinding? = null
+class NotificationFragment : Fragment() {
+    private var _binding: FragmentNotificationBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -19,14 +17,14 @@ class ProfileFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        _binding = FragmentProfileBinding.inflate(inflater, container, false)
+        _binding = FragmentNotificationBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         (requireActivity() as AppCompatActivity).setSupportActionBar(binding.toolbar)
         (requireActivity() as AppCompatActivity).supportActionBar?.apply {
-            title = "Profile"
+            title = "Notification"
         }
     }
 }

@@ -6,7 +6,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.example.mrs_tango.BaseActivity
+import com.example.mrs_tango.customer.BaseActivity
 import com.example.mrs_tango.R
 import com.example.mrs_tango.RegisterActivity
 import com.example.mrs_tango.databinding.ActivityAuthBinding

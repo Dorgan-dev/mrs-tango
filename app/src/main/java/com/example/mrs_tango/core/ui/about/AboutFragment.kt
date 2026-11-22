@@ -1,4 +1,4 @@
-package com.example.mrs_tango.About
+package com.example.mrs_tango.core.ui.about
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -6,9 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import com.example.mrs_tango.R
 import com.example.mrs_tango.databinding.FragmentAboutBinding
-import com.example.mrs_tango.databinding.FragmentHomeBinding
 
 class AboutFragment : Fragment() {
     private var _binding: FragmentAboutBinding? = null

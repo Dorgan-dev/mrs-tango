@@ -1,4 +1,4 @@
-package com.example.mrs_tango.Home // Sesuaikan package jika berbeda
+package com.example.mrs_tango.customer.home // Sesuaikan package jika berbeda
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mrs_tango.DummyData.ConsoleModel
 import com.example.mrs_tango.DummyData.ConsoleAdapter
-import com.example.mrs_tango.Home.ConsoleDetail.ConsoleDetailFragment // Pastikan import ini benar
+import com.example.mrs_tango.customer.home.ConsoleDetail.ConsoleDetailFragment // Pastikan import ini benar
 import com.example.mrs_tango.R
 import com.example.mrs_tango.databinding.FragmentHomeBinding
 

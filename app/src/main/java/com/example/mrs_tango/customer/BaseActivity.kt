@@ -1,4 +1,4 @@
-package com.example.mrs_tango
+package com.example.mrs_tango.customer
 
 import android.os.Bundle
 import android.widget.Toast
@@ -7,11 +7,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
-import com.example.mrs_tango.About.AboutFragment
-import com.example.mrs_tango.Home.HomeFragment
-import com.example.mrs_tango.Notification.NotificationFragment
-import com.example.mrs_tango.Profile.ProfileFragment
-import com.example.mrs_tango.Schedule.ScheduleFragment
+import com.example.mrs_tango.core.ui.about.AboutFragment
+import com.example.mrs_tango.customer.home.HomeFragment
+import com.example.mrs_tango.customer.notification.NotificationFragment
+import com.example.mrs_tango.core.ui.profile.ProfileFragment
+import com.example.mrs_tango.R
+import com.example.mrs_tango.customer.schedule.ScheduleFragment
 import com.example.mrs_tango.databinding.ActivityBaseBinding
 
 class BaseActivity : AppCompatActivity() {
@@ -61,13 +62,19 @@ class BaseActivity : AppCompatActivity() {
                 R.id.about -> {
                     replaceFragment(AboutFragment())
                     true
-                }R.id.schedule -> {
+                }
+
+                R.id.schedule -> {
                     replaceFragment(ScheduleFragment())
                     true
-                }R.id.notification -> {
+                }
+
+                R.id.notification -> {
                     replaceFragment(NotificationFragment())
                     true
-                }R.id.profile -> {
+                }
+
+                R.id.profile -> {
                     replaceFragment(ProfileFragment())
                     true
                 }

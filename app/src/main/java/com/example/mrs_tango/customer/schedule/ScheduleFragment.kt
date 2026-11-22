@@ -1,4 +1,4 @@
-package com.example.mrs_tango.Schedule
+package com.example.mrs_tango.customer.schedule
 
 import android.content.Intent
 import android.os.Bundle
@@ -11,7 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mrs_tango.R
-import com.example.mrs_tango.Schedule.Tutorial.TutorialMessageActivity
+import com.example.mrs_tango.customer.schedule.Tutorial.TutorialMessageActivity
 import com.example.mrs_tango.databinding.FragmentScheduleBinding
 
 class ScheduleFragment : Fragment() {
