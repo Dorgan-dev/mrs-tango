@@ -88,7 +88,7 @@ class HomeFragment : Fragment() {
 
         (requireActivity() as AppCompatActivity).setSupportActionBar(binding.toolbar)
         (requireActivity() as AppCompatActivity).supportActionBar?.apply {
-            title = "Home"
+            title = "IZIREPS"
         }
 
         // --- Inisialisasi Adapter dan RecyclerView ---
@@ -111,31 +111,38 @@ class HomeFragment : Fragment() {
         }
         // -----------------------------------------------------------
 
-        binding.btnLogout.setOnClickListener {
-            val sharedPref = requireContext().getSharedPreferences("user_pref", MODE_PRIVATE)
+//        binding.btnLogout.setOnClickListener {
+//            val sharedPref = requireContext().getSharedPreferences("user_pref", MODE_PRIVATE)
+//
+//            MaterialAlertDialogBuilder(requireContext())
+//                .setTitle("Konfirmasi")
+//                .setMessage("Apakah anda ingin logout?")
+//                .setPositiveButton("Ya") { dialog, _ ->
+//                    val editor = sharedPref.edit()
+//                    editor.clear()
+//                    editor.apply()
+//                    dialog.dismiss()
+//
+//                    val intent = Intent(requireContext(), AuthActivity::class.java)
+//                    startActivity(intent)
+//                    requireActivity().finish()
+//                }
+//                .setNegativeButton("Batal") { dialog, _ ->
+//                    dialog.dismiss()
+//                }
+//                .show()
+//        }
+//
+//        binding.btnProfile.setOnClickListener {
+//            val i = Intent(requireContext(), ProfileActivity::class.java)
+//            startActivity(i)
+//        }
 
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Konfirmasi")
-                .setMessage("Apakah anda ingin logout?")
-                .setPositiveButton("Ya") { dialog, _ ->
-                    val editor = sharedPref.edit()
-                    editor.clear()
-                    editor.apply()
-                    dialog.dismiss()
-
-                    val intent = Intent(requireContext(), AuthActivity::class.java)
-                    startActivity(intent)
-                    requireActivity().finish()
-                }
-                .setNegativeButton("Batal") { dialog, _ ->
-                    dialog.dismiss()
-                }
-                .show()
-        }
-
-        binding.btnProfile.setOnClickListener {
-            val i = Intent(requireContext(), ProfileActivity::class.java)
-            startActivity(i)
+        binding.filterIcon.setEndIconOnClickListener {
+            // Tulis kode yang ingin dijalankan di sini
+            // Contoh: Memunculkan BottomSheet untuk opsi filter
+            // val filterDialog = FilterBottomSheetFragment()
+            // filterDialog.show(parentFragmentManager, "FilterDialog")
         }
     }
 

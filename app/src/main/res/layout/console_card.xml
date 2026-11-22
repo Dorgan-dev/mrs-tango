@@ -1,49 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:padding="16dp"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp">
 
-    <androidx.cardview.widget.CardView
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="4dp"
-        app:layout_constraintTop_toTopOf="parent">
+        android:paddingBottom="12dp"> <!-- Memberikan ruang kosong di bawah harga -->
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <!-- Gambar PS -->
+        <ImageView
+            android:id="@+id/img_console"
             android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ps5_u1"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Nama Konsol -->
+        <TextView
+            android:id="@+id/tv_console_name"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:padding="8dp">
+            android:layout_marginTop="12dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:text="PlayStation 5"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/img_console" />
 
-            <!-- Gambar PS -->
-            <ImageView
-                android:id="@+id/img_console"
-                android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:src="@drawable/ps5_u1"
-                app:layout_constraintTop_toTopOf="parent" />
+        <!-- Harga Sewa -->
+        <TextView
+            android:id="@+id/tv_console_price"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:text="Rp 15.000 / Jam"
+            android:textSize="13sp"
+            android:textColor="#757575"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_console_name" />
 
-            <!-- Nama Konsol -->
-            <TextView
-                android:id="@+id/tv_console_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="PlayStation 5"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                app:layout_constraintTop_toBottomOf="@id/img_console" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <!-- Harga Sewa -->
-            <TextView
-                android:id="@+id/tv_console_price"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Rp 15.000 / Jam"
-                app:layout_constraintTop_toBottomOf="@id/tv_console_name" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>
