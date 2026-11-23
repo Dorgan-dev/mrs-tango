@@ -38,8 +38,8 @@ class LoginViewModel : ViewModel() {
                     val user = result.data // Sesuaikan nama properti data di Result.Success milikmu
 
                     val destination = when (user.role?.lowercase()) { // Pengecekan 3 Role dalam 1 tabel Gunakan .lowercase()
-                        "owner" -> "ADMIN_HOME"
-                        "cashier" -> "STAFF_HOME"
+                        "owner" -> "OWNER_HOME"
+                        "cashier" -> "CASHIER_HOME"
                         "customer" -> "CUSTOMER_HOME"
                         else -> "UNKNOWN_ROLE"
                     }

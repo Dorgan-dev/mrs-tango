@@ -21,6 +21,7 @@ import com.example.mrs_tango.auth.register.RegisterFragment
 import com.example.mrs_tango.customer.CustomerActivity
 import com.example.mrs_tango.databinding.ActivityAuthBinding
 import com.example.mrs_tango.databinding.FragmentLoginBinding
+import com.example.mrs_tango.owner.OwnerActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 
@@ -122,10 +123,10 @@ class LoginFragment : Fragment() {
 
     private fun navigateByRole(destination: String) {
         val intent = when (destination) {
-            "ADMIN_HOME" -> {
-                Intent(requireContext(), CustomerActivity::class.java) // Sementara
+            "OWNER_HOME" -> {
+                Intent(requireContext(), OwnerActivity::class.java) // Sementara
             }
-            "STAFF_HOME" -> {
+            "CASHIER_HOME" -> {
                 Intent(requireContext(), CustomerActivity::class.java) // Sementara
             }
             "CUSTOMER_HOME" -> {

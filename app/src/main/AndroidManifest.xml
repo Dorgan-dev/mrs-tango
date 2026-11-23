@@ -60,6 +60,10 @@
             android:name=".customer.schedule.Tutorial.TutorialMessageActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".owner.OwnerActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

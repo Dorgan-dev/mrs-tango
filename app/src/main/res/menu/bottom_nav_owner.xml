@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/dashboard"
+        android:icon="@drawable/ic_dashboard"
+        android:title="Dasbor" />
+
+    <item
+        android:id="@+id/report"
+        android:icon="@drawable/ic_report"
+        android:title="Laporan" />
+
+    <item
+        android:id="@+id/device"
+        android:icon="@drawable/ic_device"
+        android:title="Perangkat" />
+
+    <item
+        android:id="@+id/cashier"
+        android:icon="@drawable/ic_cashier"
+        android:title="Kasir" />
+
+</menu>
