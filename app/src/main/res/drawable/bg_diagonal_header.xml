@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Latar belakang abu-abu muda -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#EAEAEA" />
+            <stroke android:width="0.5dp" android:color="#D5D5D5" />
+        </shape>
+    </item>
+
+    <!-- Garis diagonal dari kiri atas ke kanan bawah -->
+    <item>
+        <rotate
+            android:fromDegrees="40"
+            android:toDegrees="40"
+            android:pivotX="50%"
+            android:pivotY="50%">
+            <shape android:shape="line">
+                <stroke android:width="1dp" android:color="#BDBDBD" />
+            </shape>
+        </rotate>
+    </item>
+</layer-list>

@@ -1,4 +1,4 @@
-package com.example.mrs_tango
+package com.example.mrs_tango.auth
 
 import android.app.DatePickerDialog
 import android.content.Intent
@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.mrs_tango.R
 import com.example.mrs_tango.databinding.ActivityRegisterBinding
 import java.util.Calendar
 

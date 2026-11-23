@@ -1,4 +1,4 @@
-package com.example.mrs_tango.DummyData
+package com.example.mrs_tango.core.data.DummyData
 
 import java.io.Serializable
 

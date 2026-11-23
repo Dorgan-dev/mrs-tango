@@ -8,7 +8,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.mrs_tango.customer.BaseActivity
 import com.example.mrs_tango.R
-import com.example.mrs_tango.RegisterActivity
 import com.example.mrs_tango.databinding.ActivityAuthBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
@@ -32,8 +31,8 @@ class AuthActivity : AppCompatActivity() {
         val sharedPref = getSharedPreferences("user_pref", MODE_PRIVATE)
 
         // Tombol Login
-        binding.btnLogin.setOnClickListener {
-            val username = binding.inputUsername.text.toString().trim()
+        binding.btnMasuk.setOnClickListener {
+            val username = binding.inputEmail.text.toString().trim()
             val password = binding.inputPassword.text.toString().trim()
 
             val isRegistered = sharedPref.getBoolean("is_registered", false)
@@ -66,7 +65,7 @@ class AuthActivity : AppCompatActivity() {
         }
 
         // Tombol Registrasi Akun Baru
-        binding.btnRegister.setOnClickListener {
+        binding.btnDaftar.setOnClickListener {
             val intent = Intent(this@AuthActivity, RegisterActivity::class.java)
             startActivity(intent)
         }

@@ -49,11 +49,11 @@
             android:exported="false"
             android:windowSoftInputMode="adjustNothing" />
         <activity
-            android:name=".RegisterActivity"
+            android:name=".auth.RegisterActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".VerivicationActivity"
+            android:name=".auth.VerivicationActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity

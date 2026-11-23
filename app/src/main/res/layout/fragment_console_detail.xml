@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_rounded_floating"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:backgroundTint="@color/light_green">
 
     <!-- Garis Tab (Drag Handle) -->
     <View
@@ -15,15 +16,6 @@
         android:layout_marginBottom="12dp"
         android:background="@drawable/bg_bar_floating" />
 
-    <!-- 1. Toolbar berada di atas dan statis -->
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:backgroundTint="@color/dark_green"
-        app:subtitleTextColor="@android:color/white"
-        app:titleTextColor="@android:color/white" />
 
     <!-- 2. ScrollView menjadi anak kedua dan menampung sisa konten -->
     <ScrollView

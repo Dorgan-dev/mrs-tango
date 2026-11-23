@@ -59,18 +59,9 @@ class BaseActivity : AppCompatActivity() {
                     replaceFragment(HomeFragment())
                     true
                 }
-                R.id.about -> {
-                    replaceFragment(AboutFragment())
-                    true
-                }
 
                 R.id.schedule -> {
                     replaceFragment(ScheduleFragment())
-                    true
-                }
-
-                R.id.notification -> {
-                    replaceFragment(NotificationFragment())
                     true
                 }
 

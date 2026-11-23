@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import com.example.mrs_tango.DummyData.ConsoleModel
+import com.example.mrs_tango.core.data.DummyData.ConsoleModel
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.example.mrs_tango.databinding.FragmentConsoleDetailBinding
 import com.google.android.material.R

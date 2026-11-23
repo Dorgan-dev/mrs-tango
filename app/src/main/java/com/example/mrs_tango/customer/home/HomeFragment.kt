@@ -6,8 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import com.example.mrs_tango.DummyData.ConsoleModel
-import com.example.mrs_tango.DummyData.ConsoleAdapter
+import com.example.mrs_tango.core.data.DummyData.ConsoleModel
+import com.example.mrs_tango.core.data.DummyData.ConsoleAdapter
 import com.example.mrs_tango.customer.home.ConsoleDetail.ConsoleDetailFragment // Pastikan import ini benar
 import com.example.mrs_tango.R
 import com.example.mrs_tango.databinding.FragmentHomeBinding

@@ -1,36 +1,212 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/light_green"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".customer.schedule.ScheduleFragment">
+    android:background="@color/light_green">
 
+    <!-- TOOLBAR ATAS -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:backgroundTint="@color/dark_green"
+        android:background="#008000"
+        app:contentInsetStart="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:subtitleTextColor="@android:color/white"
-        app:titleTextColor="@android:color/white"
-        app:layout_scrollFlags="enterAlways|scroll"/>
+        app:layout_constraintTop_toTopOf="parent">
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="68dp"
-        android:fontFamily="@font/commissioner_regular"
-        android:text="ini adalah halaman jadwal"
-        android:textSize="24dp"
-        android:textStyle="bold"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingHorizontal="12dp">
+
+            <ImageView
+                android:id="@+id/iconMenu"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:contentDescription="Menu"
+                android:src="@drawable/ic_menu"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/iconNotif"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:contentDescription="Notifikasi"
+                android:src="@drawable/ic_notification"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/iconChat"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginEnd="14dp"
+                android:contentDescription="Chat"
+                android:src="@drawable/ic_chat"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/iconNotif"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/toolbarTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="8dp"
+                android:ellipsize="end"
+                android:fontFamily="@font/commissioner_regular"
+                android:maxLines="1"
+                android:text="Jadwal konsol"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/iconChat"
+                app:layout_constraintStart_toEndOf="@id/iconMenu"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.appcompat.widget.Toolbar>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardSchedule"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="10dp"
+        app:cardBackgroundColor="#FFFFFF"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:strokeColor="#B8B8B8"
+        app:strokeWidth="1.5dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <!-- SISI KIRI: STICKY COLUMN (WAKTU)           -->
+            <LinearLayout
+                android:layout_width="85dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <!-- Kotak Diagonal Pojok Kiri Atas -->
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="75dp"
+                    android:background="@drawable/bg_diagonal_header"
+                    android:padding="6dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="top|end"
+                        android:fontFamily="@font/commissioner_regular"
+                        android:text="Perangkat"
+                        android:textColor="#333333"
+                        android:textSize="11sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom|start"
+                        android:fontFamily="@font/commissioner_regular"
+                        android:text="Waktu"
+                        android:textColor="#333333"
+                        android:textSize="11sp" />
+                </FrameLayout>
+
+                <!-- RecyclerView Khusus Kolom Waktu -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvTimeColumn"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:overScrollMode="never"
+                    android:scrollbars="none" />
+            </LinearLayout>
+
+            <!-- SISI KANAN: SCROLLABLE HORIZONTAL (UNIT)   -->
+            <HorizontalScrollView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:fillViewport="true"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <!-- Baris Header Nama Unit (Sticky Top) -->
+                    <LinearLayout
+                        android:id="@+id/headerUnitsContainer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="75dp"
+                        android:background="@color/light_gray"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="95dp"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/bg_table_cell"
+                            android:fontFamily="@font/commissioner_regular"
+                            android:gravity="center"
+                            android:text="PS 5\nUnit P01"
+                            android:textColor="#000000"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:layout_width="95dp"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/bg_table_cell"
+                            android:fontFamily="@font/commissioner_regular"
+                            android:gravity="center"
+                            android:text="PS 5\nUnit P02"
+                            android:textColor="#000000"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:layout_width="95dp"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/bg_table_cell"
+                            android:fontFamily="@font/commissioner_regular"
+                            android:gravity="center"
+                            android:text="PS 5\nUnit P03"
+                            android:textColor="#000000"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:layout_width="95dp"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/bg_table_cell"
+                            android:fontFamily="@font/commissioner_regular"
+                            android:gravity="center"
+                            android:text="PS 5\nUnit P04"
+                            android:textColor="#000000"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <!-- RecyclerView Khusus Status Unit -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvStatusGrid"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:overScrollMode="never" />
+                </LinearLayout>
+            </HorizontalScrollView>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
