@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -47,4 +48,16 @@ dependencies {
 
     implementation("com.tbuonomo:dotsindicator:5.1.0")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
+
+    implementation("androidx.navigation:navigation-fragment-ktx:2.9.6")
+    implementation("androidx.navigation:navigation-ui-ktx:2.9.6")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
+
+    // Supabase
+    implementation(platform("io.github.jan-tennert.supabase:bom:3.0.0"))
+    implementation("io.github.jan-tennert.supabase:postgrest-kt")
+    implementation("io.github.jan-tennert.supabase:auth-kt")
+
+    // Ktor (HTTP client untuk Supabase)
+    implementation("io.ktor:ktor-client-android:3.0.0")
 }

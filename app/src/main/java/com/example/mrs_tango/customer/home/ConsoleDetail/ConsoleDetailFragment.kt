@@ -71,13 +71,11 @@ class ConsoleDetailFragment : BottomSheetDialogFragment() {
             val datePicker = MaterialDatePicker.Builder.datePicker()
                 .setTitleText("Pilih Tanggal Booking")
                 .build()
-
             datePicker.addOnPositiveButtonClickListener { selection ->
                 val formatter = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
                 formatter.timeZone = TimeZone.getTimeZone("UTC")
                 binding.etDate.setText(formatter.format(Date(selection)))
             }
-
             datePicker.show(parentFragmentManager, "DATE_PICKER")
         }
 

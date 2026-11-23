@@ -7,23 +7,21 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
-import com.example.mrs_tango.core.ui.about.AboutFragment
 import com.example.mrs_tango.customer.home.HomeFragment
-import com.example.mrs_tango.customer.notification.NotificationFragment
 import com.example.mrs_tango.core.ui.profile.ProfileFragment
 import com.example.mrs_tango.R
 import com.example.mrs_tango.customer.schedule.ScheduleFragment
-import com.example.mrs_tango.databinding.ActivityBaseBinding
+import com.example.mrs_tango.databinding.ActivityCustomerBinding
 
-class BaseActivity : AppCompatActivity() {
+class CustomerActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityBaseBinding
+    private lateinit var binding: ActivityCustomerBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        binding = ActivityBaseBinding.inflate(layoutInflater)
+        binding = ActivityCustomerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
