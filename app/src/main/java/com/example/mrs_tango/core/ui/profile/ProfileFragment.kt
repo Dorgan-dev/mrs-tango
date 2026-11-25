@@ -8,7 +8,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import com.example.mrs_tango.R
 import com.example.mrs_tango.auth.AuthActivity
+import com.example.mrs_tango.customer.booking.history.BookingHistoryFragment
 import com.example.mrs_tango.databinding.FragmentProfileBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
@@ -51,6 +53,13 @@ class ProfileFragment : Fragment() {
                     dialog.dismiss()
                 }
                 .show()
+        }
+
+        binding.menuRiwayatBooking.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, BookingHistoryFragment())
+                .addToBackStack(null)
+                .commit()
         }
     }
 }
