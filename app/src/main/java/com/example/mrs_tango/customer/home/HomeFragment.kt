@@ -12,6 +12,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.mrs_tango.R
+import com.example.mrs_tango.core.base.BaseDrawerActivity
 import com.example.mrs_tango.core.data.DummyData.ConsoleAdapter
 import com.example.mrs_tango.core.data.DummyData.ConsoleModel
 import com.example.mrs_tango.core.data.model.DeviceModel
@@ -39,6 +40,11 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        (requireActivity() as? BaseDrawerActivity)?.setupToolbarWithDrawer(
+            toolbar = binding.toolbar,
+            title = "IZIREPS" // Ganti sesuai nama halaman
+        )
 
         (requireActivity() as AppCompatActivity).setSupportActionBar(binding.toolbar)
         (requireActivity() as AppCompatActivity).supportActionBar?.apply {

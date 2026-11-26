@@ -1,19 +1,20 @@
 package com.example.mrs_tango.customer
 
 import android.os.Bundle
-import android.widget.Toast
+import android.view.View
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
-import com.example.mrs_tango.customer.home.HomeFragment
-import com.example.mrs_tango.core.ui.profile.ProfileFragment
 import com.example.mrs_tango.R
+import com.example.mrs_tango.core.base.BaseDrawerActivity
+import com.example.mrs_tango.core.ui.profile.ProfileFragment
+import com.example.mrs_tango.customer.booking.history.BookingHistoryFragment
+import com.example.mrs_tango.customer.home.HomeFragment
 import com.example.mrs_tango.customer.schedule.ScheduleFragment
 import com.example.mrs_tango.databinding.ActivityCustomerBinding
 
-class CustomerActivity : AppCompatActivity() {
+class CustomerActivity : BaseDrawerActivity() {
 
     private lateinit var binding: ActivityCustomerBinding
 
@@ -24,58 +25,60 @@ class CustomerActivity : AppCompatActivity() {
         binding = ActivityCustomerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
-            insets
-        }
+        // 1. Wajib dipanggil tepat setelah setContentView & sebelum replaceFragment
+        initDrawer(binding.drawerLayout, binding.navigationView)
 
-        binding.bottomNavView.setOnItemSelectedListener {
-            when (it.itemId) {
-                R.id.home -> {
-                    Toast.makeText(this, "Home Clicked", Toast.LENGTH_SHORT).show()
-                    true
-                }
-                R.id.schedule -> {
-                    Toast.makeText(this, "schedule Clicked", Toast.LENGTH_SHORT).show()
-                    true
-                }
-                R.id.profile -> {
-                    Toast.makeText(this, "profile Clicked", Toast.LENGTH_SHORT).show()
-                    true
-                }
-                else -> false // return false jika item tidak ada yang di klik
+        // 2. Aman dari crash jika id "main" berubah saat dibungkus DrawerLayout
+        findViewById<View>(R.id.main)?.let { mainView ->
+            ViewCompat.setOnApplyWindowInsetsListener(mainView) { v, insets ->
+                val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+                v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
+                insets
             }
         }
 
-        /** FragmentHome sebagai fragment default */
-        replaceFragment(HomeFragment())
-
-        binding.bottomNavView.setOnItemSelectedListener {
-            when (it.itemId) {
+        // 3. Listener Bottom Navigation (cukup satu kali, yang dobel dihapus)
+        binding.bottomNavView.setOnItemSelectedListener { item ->
+            when (item.itemId) {
                 R.id.home -> {
                     replaceFragment(HomeFragment())
                     true
                 }
-
                 R.id.schedule -> {
-                    replaceFragment(ScheduleFragment())
+                    replaceFragment(ScheduleFragment()) // atau BookingHistoryFragment()
                     true
                 }
-
                 R.id.profile -> {
                     replaceFragment(ProfileFragment())
                     true
                 }
-                else ->false
+                else -> false
             }
+        }
+
+        // 4. Muat HomeFragment hanya saat pertama kali Activity dibuat
+        if (savedInstanceState == null) {
+            replaceFragment(HomeFragment())
         }
     }
 
     private fun replaceFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction()
             .replace(binding.fragmentContainer.id, fragment)
-            //.addToBackStack(null) -> ini kita nonaktifkan agar saat back langsung keluar aplikasi
             .commit()
+    }
+
+    override fun onDrawerItemSelected(itemId: Int) {
+        when (itemId) {
+            R.id.nav_home -> {
+                binding.bottomNavView.selectedItemId = R.id.home
+            }
+            R.id.nav_booking_history -> {
+                replaceFragment(BookingHistoryFragment())
+            }
+            R.id.nav_profile -> {
+                binding.bottomNavView.selectedItemId = R.id.profile
+            }
+        }
     }
 }
