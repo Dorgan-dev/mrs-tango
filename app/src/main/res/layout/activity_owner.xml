@@ -27,6 +27,6 @@
         app:labelVisibilityMode="labeled"
         app:itemIconSize="22dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:menu="@menu/bottom_nav_owner" />
+        app:menu="@menu/owner_bottom_nav" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

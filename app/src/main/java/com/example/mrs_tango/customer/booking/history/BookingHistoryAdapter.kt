@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mrs_tango.core.data.model.BookingModel
-import com.example.mrs_tango.databinding.ItemBookingHistoryBinding
+import com.example.mrs_tango.databinding.CustomerItemBookingHistoryBinding
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -29,7 +29,7 @@ class BookingHistoryAdapter(
         notifyDataSetChanged()
     }
 
-    inner class HistoryViewHolder(private val binding: ItemBookingHistoryBinding) :
+    inner class HistoryViewHolder(private val binding: CustomerItemBookingHistoryBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(booking: BookingModel) {
@@ -104,7 +104,7 @@ class BookingHistoryAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder {
-        val binding = ItemBookingHistoryBinding.inflate(
+        val binding = CustomerItemBookingHistoryBinding.inflate(
             LayoutInflater.from(parent.context), parent, false
         )
         return HistoryViewHolder(binding)

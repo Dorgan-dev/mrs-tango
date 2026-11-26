@@ -7,16 +7,16 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mrs_tango.R
-import com.example.mrs_tango.databinding.ItemScheduleTimeBinding
+import com.example.mrs_tango.databinding.CustomerItemScheduleTimeBinding
 
 class TimeColumnAdapter(private val times: List<String>) :
     RecyclerView.Adapter<TimeColumnAdapter.TimeViewHolder>() {
 
-    inner class TimeViewHolder(val binding: ItemScheduleTimeBinding) :
+    inner class TimeViewHolder(val binding: CustomerItemScheduleTimeBinding) :
         RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TimeViewHolder {
-        val binding = ItemScheduleTimeBinding.inflate(
+        val binding = CustomerItemScheduleTimeBinding.inflate(
             LayoutInflater.from(parent.context), parent, false
         )
         return TimeViewHolder(binding)

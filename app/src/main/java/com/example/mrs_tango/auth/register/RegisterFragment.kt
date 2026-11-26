@@ -23,7 +23,6 @@ class RegisterFragment : Fragment() {
 
     private var _binding: FragmentRegisterBinding? = null
     private val binding get() = _binding!!
-
     private val vm: RegisterViewModel by viewModels()
 
     override fun onCreateView(
@@ -87,7 +86,7 @@ class RegisterFragment : Fragment() {
 
                         // Navigasi ke Login
                         parentFragmentManager.beginTransaction()
-                            .replace(R.id.fragmentContainer, LoginFragment())
+                            .replace(R.id.fragment_container, LoginFragment())
                             .commit()
                     }
 
@@ -110,7 +109,7 @@ class RegisterFragment : Fragment() {
         // 4. Sudah punya akun? Login
         binding.btnMasuk.setOnClickListener {
             parentFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, LoginFragment())
+                .replace(R.id.fragment_container, LoginFragment())
                 .addToBackStack(null)
                 .commit()
         }

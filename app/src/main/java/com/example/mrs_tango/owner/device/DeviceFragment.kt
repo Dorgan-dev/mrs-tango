@@ -71,7 +71,7 @@ class DeviceFragment : Fragment() {
     }
 
     private fun showDeviceForm(device: DeviceModel?) {
-        val bottomSheet = DeviceFormBottomSheet(
+        val bottomSheet = DeviceFormFragment(
             existingDevice = device,
             onSave = { submittedDevice ->
                 if (device == null) {

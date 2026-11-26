@@ -6,15 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import com.example.mrs_tango.core.data.model.DeviceModel
-import com.example.mrs_tango.databinding.BottomSheetDeviceFormBinding
+import com.example.mrs_tango.databinding.FragmentDeviceFormBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
-class DeviceFormBottomSheet(
+class DeviceFormFragment(
     private val existingDevice: DeviceModel? = null,
     private val onSave: (DeviceModel) -> Unit
 ) : BottomSheetDialogFragment() {
 
-    private var _binding: BottomSheetDeviceFormBinding? = null
+    private var _binding: FragmentDeviceFormBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -22,7 +22,7 @@ class DeviceFormBottomSheet(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = BottomSheetDeviceFormBinding.inflate(inflater, container, false)
+        _binding = FragmentDeviceFormBinding.inflate(inflater, container, false)
         return binding.root
     }
 

@@ -13,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mrs_tango.R
-import com.example.mrs_tango.core.data.model.ScheduleRowModel
 import com.example.mrs_tango.customer.schedule.Tutorial.TutorialMessageActivity
 import com.example.mrs_tango.databinding.FragmentScheduleBinding
 
@@ -39,7 +38,7 @@ class ScheduleFragment : Fragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.schedule_toolbar_menu, menu)
+        inflater.inflate(R.menu.customer_schedule_toolbar, menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

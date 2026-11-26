@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mrs_tango.core.data.model.DeviceModel
-import com.example.mrs_tango.databinding.ItemDeviceBinding
+import com.example.mrs_tango.databinding.OwnerItemDeviceBinding
 
 class DeviceAdapter(
     private val onEditClick: (DeviceModel) -> Unit,
@@ -20,7 +20,7 @@ class DeviceAdapter(
         notifyDataSetChanged()
     }
 
-    inner class DeviceViewHolder(private val binding: ItemDeviceBinding) :
+    inner class DeviceViewHolder(private val binding: OwnerItemDeviceBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(device: DeviceModel) {
@@ -66,7 +66,7 @@ class DeviceAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DeviceViewHolder {
-        val binding = ItemDeviceBinding.inflate(
+        val binding = OwnerItemDeviceBinding.inflate(
             LayoutInflater.from(parent.context), parent, false
         )
         return DeviceViewHolder(binding)

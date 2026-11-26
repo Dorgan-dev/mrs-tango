@@ -15,7 +15,7 @@ import com.example.mrs_tango.R
 import com.example.mrs_tango.core.data.DummyData.ConsoleAdapter
 import com.example.mrs_tango.core.data.DummyData.ConsoleModel
 import com.example.mrs_tango.core.data.model.DeviceModel
-import com.example.mrs_tango.customer.home.ConsoleDetail.ConsoleDetailFragment
+import com.example.mrs_tango.customer.home.device_detail.DeviceDetailFragment
 import com.example.mrs_tango.databinding.FragmentHomeBinding
 import com.example.mrs_tango.owner.device.DeviceListState
 import com.example.mrs_tango.owner.device.DeviceViewModel
@@ -81,7 +81,7 @@ class HomeFragment : Fragment() {
 
                             val consoleAdapter =
                                 ConsoleAdapter(ArrayList(mappedList)) { selectedConsole ->
-                                    val detailFragment = ConsoleDetailFragment().apply {
+                                    val detailFragment = DeviceDetailFragment().apply {
                                         arguments = Bundle().apply {
                                             // Kirim UUID asli dari tabel devices & objek ConsoleModel
                                             putString("EXTRA_DEVICE_ID", selectedConsole.id)

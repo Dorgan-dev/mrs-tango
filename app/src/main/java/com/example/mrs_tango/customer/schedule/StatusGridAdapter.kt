@@ -11,16 +11,16 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.example.mrs_tango.R
-import com.example.mrs_tango.databinding.ItemScheduleStatusBinding
+import com.example.mrs_tango.databinding.CustomerItemScheduleStatusBinding
 
 class StatusGridAdapter(private val statusRows: List<List<String>>) :
     RecyclerView.Adapter<StatusGridAdapter.StatusViewHolder>() {
 
-    inner class StatusViewHolder(val binding: ItemScheduleStatusBinding) :
+    inner class StatusViewHolder(val binding: CustomerItemScheduleStatusBinding) :
         RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StatusViewHolder {
-        val binding = ItemScheduleStatusBinding.inflate(
+        val binding = CustomerItemScheduleStatusBinding.inflate(
             LayoutInflater.from(parent.context), parent, false
         )
         return StatusViewHolder(binding)

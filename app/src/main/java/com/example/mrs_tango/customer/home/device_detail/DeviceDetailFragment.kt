@@ -1,27 +1,27 @@
-package com.example.mrs_tango.customer.home.ConsoleDetail
+package com.example.mrs_tango.customer.home.device_detail
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.mrs_tango.R // <-- Pastikan ini R milik aplikasimu, BUKAN material.R
+import com.example.mrs_tango.R
 import com.example.mrs_tango.core.data.DummyData.ConsoleModel
 import com.example.mrs_tango.customer.booking.BookingFragment
-import com.example.mrs_tango.databinding.FragmentConsoleDetailBinding
+import com.example.mrs_tango.databinding.FragmentDeviceDetailBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
-class ConsoleDetailFragment : BottomSheetDialogFragment() {
+class DeviceDetailFragment : BottomSheetDialogFragment() {
 
-    private var _binding: FragmentConsoleDetailBinding? = null
+    private var _binding: FragmentDeviceDetailBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentConsoleDetailBinding.inflate(inflater, container, false)
+        _binding = FragmentDeviceDetailBinding.inflate(inflater, container, false)
         return binding.root
     }
 

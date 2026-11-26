@@ -70,10 +70,6 @@ class MainActivity : AppCompatActivity() {
                 .show()
         }
 
-        binding.btnProfile.setOnClickListener {
-            val i = Intent(this@MainActivity, ProfileActivity::class.java)
-            startActivity(i)
-        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
