@@ -2,6 +2,7 @@ package com.example.mrs_tango.customer
 
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import androidx.activity.enableEdgeToEdge
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -13,6 +14,7 @@ import com.example.mrs_tango.customer.booking.history.BookingHistoryFragment
 import com.example.mrs_tango.customer.home.HomeFragment
 import com.example.mrs_tango.customer.schedule.ScheduleFragment
 import com.example.mrs_tango.databinding.ActivityCustomerBinding
+import androidx.core.graphics.Insets
 
 class CustomerActivity : BaseDrawerActivity() {
 
@@ -24,6 +26,23 @@ class CustomerActivity : BaseDrawerActivity() {
 
         binding = ActivityCustomerBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.drawerLayout) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val params = v.layoutParams as ViewGroup.MarginLayoutParams
+            params.topMargin = systemBars.top
+            params.leftMargin = systemBars.left
+            params.rightMargin = systemBars.right
+            v.layoutParams = params
+
+            // Inset atas sudah dipakai DrawerLayout; teruskan inset bawah saja untuk BottomNavigationView
+            WindowInsetsCompat.Builder(insets)
+                .setInsets(
+                    WindowInsetsCompat.Type.systemBars(),
+                    Insets.of(0, 0, 0, systemBars.bottom)
+                )
+                .build()
+        }
 
         // 1. Wajib dipanggil tepat setelah setContentView & sebelum replaceFragment
         initDrawer(binding.drawerLayout, binding.navigationView)

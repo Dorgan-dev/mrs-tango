@@ -1,6 +1,7 @@
 package com.example.mrs_tango.core.base // Sesuaikan package kamu
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.widget.TextView
@@ -11,6 +12,8 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.example.mrs_tango.R
+import com.example.mrs_tango.auth.AuthActivity
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationView
 
 abstract class BaseDrawerActivity : AppCompatActivity() {
@@ -93,6 +96,18 @@ abstract class BaseDrawerActivity : AppCompatActivity() {
         drawerToggle!!.syncState()
     }
 
+    fun openDrawer() {
+        if (::drawerLayout.isInitialized) {
+            drawerLayout.openDrawer(GravityCompat.START)
+        }
+    }
+
+    fun unlockDrawer() {
+        if (::drawerLayout.isInitialized) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+        }
+    }
+
     /**
      * Dipakai oleh Fragment TURUNAN/FORM (munculkan tombol Back & kunci sidebar)
      */
@@ -116,8 +131,25 @@ abstract class BaseDrawerActivity : AppCompatActivity() {
     }
 
     private fun performLogout() {
-        getSharedPreferences("user_pref", Context.MODE_PRIVATE).edit().clear().apply()
-        // TODO: Pindah ke LoginActivity dengan FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK
+        val sharedPref = this.getSharedPreferences("user_pref", MODE_PRIVATE)
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Konfirmasi")
+            .setMessage("Apakah anda ingin logout?")
+            .setPositiveButton("Ya") { dialog, _ ->
+                val editor = sharedPref.edit()
+                editor.clear()
+                editor.apply()
+                dialog.dismiss()
+
+                val intent = Intent(this, AuthActivity::class.java)
+                startActivity(intent)
+                this.finish()
+            }
+            .setNegativeButton("Batal") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 
     protected abstract fun onDrawerItemSelected(itemId: Int)

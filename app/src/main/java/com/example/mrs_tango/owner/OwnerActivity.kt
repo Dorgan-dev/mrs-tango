@@ -9,8 +9,11 @@ import androidx.viewpager2.widget.ViewPager2
 import com.example.mrs_tango.R
 import com.example.mrs_tango.databinding.ActivityOwnerBinding
 import androidx.core.view.get
+import androidx.fragment.app.Fragment
+import com.example.mrs_tango.core.base.BaseDrawerActivity
+import com.example.mrs_tango.customer.booking.history.BookingHistoryFragment
 
-class OwnerActivity : AppCompatActivity() {
+class OwnerActivity : BaseDrawerActivity() {
 
     private lateinit var binding: ActivityOwnerBinding
 
@@ -18,7 +21,7 @@ class OwnerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityOwnerBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        initDrawer(binding.drawerLayout, binding.navigationView)
         setupViewPagerAndBottomNav()
     }
 
@@ -41,6 +44,26 @@ class OwnerActivity : AppCompatActivity() {
                 R.id.cashier -> binding.viewPager.currentItem = 3
             }
             true
+        }
+    }
+
+    private fun replaceFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(binding.viewPager.id, fragment)
+            .commit()
+    }
+
+    override fun onDrawerItemSelected(itemId: Int) {
+        when (itemId) {
+            R.id.nav_home -> {
+                binding.bottomNavView.selectedItemId = R.id.home
+            }
+            R.id.nav_booking_history -> {
+                replaceFragment(BookingHistoryFragment())
+            }
+            R.id.nav_profile -> {
+                binding.bottomNavView.selectedItemId = R.id.profile
+            }
         }
     }
 }

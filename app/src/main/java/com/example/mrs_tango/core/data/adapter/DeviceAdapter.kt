@@ -5,17 +5,17 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.mrs_tango.core.data.model.DeviceModel
+import com.example.mrs_tango.core.data.model.DeviceDetailsModel
 import com.example.mrs_tango.databinding.OwnerItemDeviceBinding
 
 class DeviceAdapter(
-    private val onEditClick: (DeviceModel) -> Unit,
-    private val onDeleteClick: (DeviceModel) -> Unit
+    private val onEditClick: (DeviceDetailsModel) -> Unit,
+    private val onDeleteClick: (DeviceDetailsModel) -> Unit
 ) : RecyclerView.Adapter<DeviceAdapter.DeviceViewHolder>() {
 
-    private var deviceList: List<DeviceModel> = emptyList()
+    private var deviceList: List<DeviceDetailsModel> = emptyList()
 
-    fun submitList(newList: List<DeviceModel>) {
+    fun submitList(newList: List<DeviceDetailsModel>) {
         deviceList = newList
         notifyDataSetChanged()
     }
@@ -23,8 +23,8 @@ class DeviceAdapter(
     inner class DeviceViewHolder(private val binding: OwnerItemDeviceBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(device: DeviceModel) {
-            binding.deviceName.text = device.name ?: "-"
+        fun bind(device: DeviceDetailsModel) {
+            binding.deviceName.text = device.name.ifBlank { "-" }
 
             // Info Konsol
             val type = device.consoleType ?: "-"

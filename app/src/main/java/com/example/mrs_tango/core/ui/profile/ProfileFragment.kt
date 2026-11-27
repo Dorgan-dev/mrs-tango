@@ -10,9 +10,11 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mrs_tango.R
 import com.example.mrs_tango.auth.AuthActivity
+import com.example.mrs_tango.core.base.BaseDrawerActivity
 import com.example.mrs_tango.customer.booking.history.BookingHistoryFragment
 import com.example.mrs_tango.databinding.FragmentProfileBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import androidx.core.content.edit
 
 class ProfileFragment : Fragment() {
     private var _binding: FragmentProfileBinding? = null
@@ -40,9 +42,9 @@ class ProfileFragment : Fragment() {
                 .setTitle("Konfirmasi")
                 .setMessage("Apakah anda ingin logout?")
                 .setPositiveButton("Ya") { dialog, _ ->
-                    val editor = sharedPref.edit()
-                    editor.clear()
-                    editor.apply()
+                    sharedPref.edit {
+                        clear()
+                    }
                     dialog.dismiss()
 
                     val intent = Intent(requireContext(), AuthActivity::class.java)
@@ -60,6 +62,14 @@ class ProfileFragment : Fragment() {
                 .replace(R.id.fragment_container, BookingHistoryFragment())
                 .addToBackStack(null)
                 .commit()
+        }
+
+        //kode untuk mengaktifkan sidebar di ikon burger
+        val baseActivity = requireActivity() as? BaseDrawerActivity
+        baseActivity?.unlockDrawer()
+
+        binding.iconMenu.setOnClickListener {
+            baseActivity?.openDrawer()
         }
     }
 }

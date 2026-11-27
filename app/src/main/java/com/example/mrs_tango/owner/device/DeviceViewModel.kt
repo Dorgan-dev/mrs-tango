@@ -3,6 +3,7 @@ package com.example.mrs_tango.owner.device
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mrs_tango.core.data.model.DeviceModel
+import com.example.mrs_tango.core.data.model.DeviceDetailsModel
 import com.example.mrs_tango.core.data.repository.DeviceRepository
 import com.example.mrs_tango.core.utils.Result
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,7 +12,7 @@ import kotlinx.coroutines.launch
 
 sealed class DeviceListState {
     object Loading : DeviceListState()
-    data class Success(val devices: List<DeviceModel>) : DeviceListState()
+    data class Success(val devices: List<DeviceDetailsModel>) : DeviceListState()
     data class Error(val message: String) : DeviceListState()
 }
 
@@ -32,7 +33,7 @@ class DeviceViewModel : ViewModel() {
     private val _actionState = MutableStateFlow<DeviceActionState>(DeviceActionState.Idle)
     val actionState: StateFlow<DeviceActionState> = _actionState
 
-    private var fullDeviceList: List<DeviceModel> = emptyList() // Menyimpan daftar asli untuk fitur pencarian lokal
+    private var fullDeviceList: List<DeviceDetailsModel> = emptyList()
 
     init {
         fetchDevices()
@@ -41,7 +42,7 @@ class DeviceViewModel : ViewModel() {
     fun fetchDevices() {
         _listState.value = DeviceListState.Loading
         viewModelScope.launch {
-            when (val result = repository.getAllDevices()) {
+            when (val result = repository.getDevicesWithDetails()) {
                 is Result.Success -> {
                     fullDeviceList = result.data
                     _listState.value = DeviceListState.Success(fullDeviceList)
@@ -60,7 +61,7 @@ class DeviceViewModel : ViewModel() {
             return
         }
         val filtered = fullDeviceList.filter { device ->
-            (device.name?.contains(query, ignoreCase = true) == true) ||
+            device.name.contains(query, ignoreCase = true) ||
                     (device.consoleType?.contains(query, ignoreCase = true) == true) ||
                     (device.tvIpAddress?.contains(query, ignoreCase = true) == true)
         }
@@ -78,7 +79,7 @@ class DeviceViewModel : ViewModel() {
             when (val result = repository.addDevice(device)) {
                 is Result.Success -> {
                     _actionState.value = DeviceActionState.Success("Perangkat berhasil ditambahkan")
-                    fetchDevices() // Refresh daftar otomatis
+                    fetchDevices()
                 }
                 is Result.Error -> {
                     _actionState.value = DeviceActionState.Error(result.message)
@@ -99,7 +100,7 @@ class DeviceViewModel : ViewModel() {
             when (val result = repository.updateDevice(deviceId, device)) {
                 is Result.Success -> {
                     _actionState.value = DeviceActionState.Success("Perangkat berhasil diperbarui")
-                    fetchDevices() // Refresh daftar otomatis
+                    fetchDevices()
                 }
                 is Result.Error -> {
                     _actionState.value = DeviceActionState.Error(result.message)
@@ -109,13 +110,13 @@ class DeviceViewModel : ViewModel() {
         }
     }
 
-    fun deleteDevice(deviceId: String) {
+    fun deleteDevice(deviceId: String?) {
         _actionState.value = DeviceActionState.Loading
         viewModelScope.launch {
             when (val result = repository.deleteDevice(deviceId)) {
                 is Result.Success -> {
                     _actionState.value = DeviceActionState.Success("Perangkat berhasil dihapus")
-                    fetchDevices() // Refresh daftar otomatis
+                    fetchDevices()
                 }
                 is Result.Error -> {
                     _actionState.value = DeviceActionState.Error(result.message)

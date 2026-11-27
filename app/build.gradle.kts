@@ -8,7 +8,7 @@ android {
     compileSdk {
         version = release(37)
     }
-    buildFeatures{
+    buildFeatures {
         viewBinding = true
     }
 
@@ -57,7 +57,12 @@ dependencies {
     implementation(platform("io.github.jan-tennert.supabase:bom:3.0.0"))
     implementation("io.github.jan-tennert.supabase:postgrest-kt")
     implementation("io.github.jan-tennert.supabase:auth-kt")
+    // Supabase Storage (versi mengikuti supabase BOM yang sudah ada di project-mu)
+    implementation("io.github.jan-tennert.supabase:storage-kt")
+    // Coil untuk menampilkan gambar dari URL
+    implementation("io.coil-kt:coil:2.7.0")
 
     // Ktor (HTTP client untuk Supabase)
     implementation("io.ktor:ktor-client-android:3.0.0")
+    implementation("com.google.android.material:material:1.12.0")
 }

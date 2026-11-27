@@ -13,7 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.mrs_tango.core.data.adapter.DeviceAdapter
-import com.example.mrs_tango.core.data.model.DeviceModel
+import com.example.mrs_tango.core.data.model.DeviceDetailsModel
 import com.example.mrs_tango.databinding.FragmentDeviceBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
@@ -70,33 +70,24 @@ class DeviceFragment : Fragment() {
         }
     }
 
-    private fun showDeviceForm(device: DeviceModel?) {
+    private fun showDeviceForm(device: DeviceDetailsModel?) {
         val bottomSheet = DeviceFormFragment(
             existingDevice = device,
-            onSave = { submittedDevice ->
-                if (device == null) {
-                    // Mode Create
-                    viewModel.addDevice(submittedDevice)
-                } else {
-                    // Mode Update
-                    device.id?.let { id ->
-                        viewModel.updateDevice(id, submittedDevice)
-                    }
-                }
+            onSaved = {
+                // Refresh daftar perangkat + foto + tarif setelah berhasil simpan
+                viewModel.fetchDevices()
             }
         )
         bottomSheet.show(parentFragmentManager, "DeviceFormBottomSheet")
     }
 
-    private fun showDeleteConfirmation(device: DeviceModel) {
+    private fun showDeleteConfirmation(device: DeviceDetailsModel) {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Hapus Perangkat")
             .setMessage("Apakah Anda yakin ingin menghapus \"${device.name}\"? Data yang dihapus tidak dapat dikembalikan.")
             .setNegativeButton("Batal") { dialog, _ -> dialog.dismiss() }
             .setPositiveButton("Hapus") { dialog, _ ->
-                device.id?.let { id ->
-                    viewModel.deleteDevice(id)
-                }
+                viewModel.deleteDevice(device.id)
                 dialog.dismiss()
             }
             .show()
@@ -133,7 +124,7 @@ class DeviceFragment : Fragment() {
                     }
                 }
 
-                // 2. Amati Hasil Aksi CRUD (Tambah / Edit / Hapus)
+                // 2. Amati Hasil Aksi (Hapus perangkat, dll.)
                 launch {
                     viewModel.actionState.collect { action ->
                         when (action) {

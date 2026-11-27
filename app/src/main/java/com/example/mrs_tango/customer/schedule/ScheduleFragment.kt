@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mrs_tango.R
+import com.example.mrs_tango.core.base.BaseDrawerActivity
 import com.example.mrs_tango.customer.schedule.Tutorial.TutorialMessageActivity
 import com.example.mrs_tango.databinding.FragmentScheduleBinding
 
@@ -35,20 +36,13 @@ class ScheduleFragment : Fragment() {
         }
         setHasOptionsMenu(true)
         setupSynchronizedTables()
-    }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.customer_schedule_toolbar, menu)
-    }
+        //kode untuk mengaktifkan sidebar di ikon burger
+        val baseActivity = requireActivity() as? BaseDrawerActivity
+        baseActivity?.unlockDrawer()
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_tutorial -> {
-                val intent = Intent(requireContext(), TutorialMessageActivity::class.java)
-                startActivity(intent)
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
+        binding.iconMenu.setOnClickListener {
+            baseActivity?.openDrawer()
         }
     }
 
