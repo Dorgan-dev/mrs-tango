@@ -11,6 +11,8 @@ data class UserModel(
     val password: String,
     val password_set: Int? = 0,
     val gender: String,
+    val phone: String? = null,
+    val avatar: String? = null,
     @SerialName("birth_date")
     val birthDate: String,
     val role: String = "customer",
