@@ -5,120 +5,162 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.mrs_tango.core.data.model.BookingModel
-import com.example.mrs_tango.databinding.CustomerItemBookingHistoryBinding
-import java.text.NumberFormat
-import java.util.Locale
+import com.example.mrs_tango.core.data.model.BookingDetailsModel
+import com.example.mrs_tango.core.utils.toRupiah
+import com.example.mrs_tango.databinding.ItemBookingHistoryBinding
 
 class BookingHistoryAdapter(
-    private val onCancelClick: (BookingModel) -> Unit
-) : RecyclerView.Adapter<BookingHistoryAdapter.HistoryViewHolder>() {
+    private val onViewProofClick: (String) -> Unit,
+    private val onReuploadProofClick: (BookingDetailsModel) -> Unit,
+    private val onCancelClick: (BookingDetailsModel) -> Unit
+) : ListAdapter<BookingDetailsModel, BookingHistoryAdapter.ViewHolder>(DiffCallback) {
 
-    private var bookingList: List<BookingModel> = emptyList()
-    private var deviceNameMap: Map<String, String> = emptyMap()
+    inner class ViewHolder(
+        private val binding: ItemBookingHistoryBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
 
-    fun submitData(newList: List<BookingModel>, devicesMap: Map<String, String>) {
-        bookingList = newList
-        deviceNameMap = devicesMap
-        notifyDataSetChanged()
-    }
+        // Mengisi seluruh informasi booking dan mengatur tampilan berdasarkan status pesanan.
+        fun bind(item: BookingDetailsModel) {
+            val currentStatus = item.status?.lowercase() ?: "pending"
 
-    fun updateDeviceMap(devicesMap: Map<String, String>) {
-        deviceNameMap = devicesMap
-        notifyDataSetChanged()
-    }
-
-    inner class HistoryViewHolder(private val binding: CustomerItemBookingHistoryBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-
-        fun bind(booking: BookingModel) {
-            // Nama Perangkat
-            val deviceName = deviceNameMap[booking.deviceId] ?: "Unit #${booking.deviceId.take(6)}"
-            binding.tvDeviceName.text = deviceName
-
-            // Tanggal & Jam
-            val start = booking.startTime.take(5)
-            val end = booking.endTime?.take(5)
-            val timeRange = if (end != null) "$start - $end" else "$start (Open Bill)"
-            binding.tvBookingDateTime.text = "${booking.usageDate} • $timeRange"
-
-            // Tipe & Durasi
-            val typeLabel = if (booking.timeType == "open_bill") "Open Bill" else "Per Jam"
-            val durationText = booking.durationMinutes?.let { mins ->
-                val hours = mins / 60
-                if (hours > 0) " • $hours Jam" else " • $mins Menit"
-            } ?: ""
-            binding.tvBookingTypeDuration.text = "Tipe: $typeLabel$durationText"
-
-            // Estimasi Biaya
-            binding.tvEstimatedCost.text = if (booking.estimatedCost != null) {
-                "Estimasi: ${formatRupiah(booking.estimatedCost)}"
-            } else {
-                "Estimasi: Dihitung saat selesai"
-            }
-
-            // Badge Status & Warna
-            val status = (booking.status ?: "pending").lowercase()
-            binding.tvBookingStatus.text = status.replaceFirstChar { it.uppercase() }
-
-            when (status) {
-                "pending" -> {
-                    binding.tvBookingStatus.setTextColor(Color.parseColor("#E65100"))
-                    binding.tvBookingStatus.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#FFF3E0"))
-                }
-                "confirmed" -> {
-                    binding.tvBookingStatus.setTextColor(Color.parseColor("#1B5E20"))
-                    binding.tvBookingStatus.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#E8F5E9"))
-                }
-                "completed" -> {
-                    binding.tvBookingStatus.setTextColor(Color.parseColor("#0D47A1"))
-                    binding.tvBookingStatus.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#E3F2FD"))
-                }
-                "canceled" -> {
-                    binding.tvBookingStatus.setTextColor(Color.parseColor("#B71C1C"))
-                    binding.tvBookingStatus.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#FFEBEE"))
-                }
-                else -> {
-                    binding.tvBookingStatus.setTextColor(Color.parseColor("#424242"))
-                    binding.tvBookingStatus.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#EEEEEE"))
+            binding.tvDeviceName.text = buildString {
+                append(item.device?.name ?: "Perangkat PS")
+                item.device?.psType?.takeIf { it.isNotBlank() }?.let {
+                    append(" ($it)")
                 }
             }
 
-            // Tampilkan alasan batal jika status canceled
-            if (status == "canceled" && !booking.cancelReason.isNullOrBlank()) {
-                binding.tvCancelReason.visibility = View.VISIBLE
-                binding.tvCancelReason.text = "Alasan batal: ${booking.cancelReason}"
-            } else {
-                binding.tvCancelReason.visibility = View.GONE
+            binding.tvBookingSchedule.text =
+                "${item.bookingDate ?: "-"} • ${item.formattedTimeRange}"
+
+            binding.tvEstimatedCost.text = item.estimatedCost?.let {
+                "Estimasi Total: ${it.toRupiah()}"
+            } ?: "Estimasi Total: Open Bill"
+
+            binding.tvDpAmount.text = "DP: ${(item.dpAmount ?: 0).toRupiah()}"
+
+            bindStatus(currentStatus)
+            bindProof(item)
+            bindCancelReason(item)
+            bindRefund(item)
+            bindActions(item, currentStatus)
+        }
+
+        // Mengatur label dan warna badge sesuai status booking.
+        private fun bindStatus(status: String) {
+            var (label, background, text) = when (status) {
+                "pending" -> Triple("MENUNGGU VERIFIKASI", "#FFF8E1", "#F57F17")
+                "confirmed" -> Triple("DIKONFIRMASI", "#E8F5E9", "#1B5E20")
+                "completed" -> Triple("SELESAI", "#E3F2FD", "#1565C0")
+                "rejected" -> Triple("DITOLAK", "#FFEBEE", "#C62828")
+                "cancelled", "canceled" -> Triple("DIBATALKAN", "#FFEBEE", "#C62828")
+                "expired" -> Triple("KEDALUWARSA", "#ECEFF1", "#455A64")
+                else -> Triple(status.uppercase(), "#ECEFF1", "#455A64")
             }
 
-            // Tombol Batalkan hanya aktif jika masih pending
-            if (status == "pending") {
-                binding.btnCancelBooking.visibility = View.VISIBLE
-                binding.btnCancelBooking.setOnClickListener { onCancelClick(booking) }
-            } else {
-                binding.btnCancelBooking.visibility = View.GONE
+            binding.tvBookingStatus.apply {
+                text = label
+                backgroundTintList = ColorStateList.valueOf(Color.parseColor(background))
+                setTextColor(Color.parseColor(text))
+            }
+        }
+
+        // Menampilkan tombol untuk melihat bukti pembayaran jika URL bukti DP tersedia.
+        private fun bindProof(item: BookingDetailsModel) {
+            val proofUrl = item.effectiveDpProof
+
+            binding.btnViewDpProof.apply {
+                visibility = if (proofUrl.isNullOrBlank()) View.GONE else View.VISIBLE
+                setOnClickListener {
+                    proofUrl?.let(onViewProofClick)
+                }
+            }
+        }
+
+        // Menampilkan alasan pembatalan atau penolakan beserta pihak yang melakukannya.
+        private fun bindCancelReason(item: BookingDetailsModel) {
+            val reason = item.cancelReason
+
+            binding.layoutCancelReason.visibility =
+                if (reason.isNullOrBlank()) View.GONE else View.VISIBLE
+
+            if (!reason.isNullOrBlank()) {
+                val actor = when {
+                    item.cancelledBy.isNullOrBlank() -> ""
+                    item.cancelledBy == item.customerId -> "Pelanggan"
+                    else -> "Kasir/Outlet"
+                }
+
+                val prefix = if (actor.isNotEmpty()) {
+                    "Keterangan ($actor): "
+                } else {
+                    "Keterangan: "
+                }
+
+                binding.tvCancelReason.text = "$prefix$reason"
+            }
+        }
+
+        // Menampilkan informasi pengembalian dana jika data refund tersedia.
+        private fun bindRefund(item: BookingDetailsModel) {
+            val refund = item.latestRefund
+
+            binding.layoutRefundInfo.visibility =
+                if (refund == null) View.GONE else View.VISIBLE
+
+            refund?.let {
+                binding.tvRefundDetail.text =
+                    "Dana dikembalikan: ${it.refundAmount.toRupiah()} via ${it.refundMethod.uppercase()}\n" +
+                            "Catatan: ${it.reason}"
+            }
+        }
+
+        // Menampilkan tombol upload ulang bukti DP dan pembatalan hanya untuk booking pending.
+        private fun bindActions(item: BookingDetailsModel, status: String) {
+            val isPending = status == "pending"
+
+            binding.layoutPendingActions.visibility =
+                if (isPending) View.VISIBLE else View.GONE
+
+            binding.btnReuploadDp.setOnClickListener {
+                onReuploadProofClick(item)
+            }
+
+            binding.btnCancelBooking.setOnClickListener {
+                onCancelClick(item)
             }
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder {
-        val binding = CustomerItemBookingHistoryBinding.inflate(
-            LayoutInflater.from(parent.context), parent, false
+    // Membuat ViewHolder menggunakan layout item riwayat booking.
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val binding = ItemBookingHistoryBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
         )
-        return HistoryViewHolder(binding)
+        return ViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: HistoryViewHolder, position: Int) {
-        holder.bind(bookingList[position])
+    // Mengikat data booking ke ViewHolder berdasarkan posisi item.
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.bind(getItem(position))
     }
 
-    override fun getItemCount(): Int = bookingList.size
+    companion object {
+        private val DiffCallback = object : DiffUtil.ItemCallback<BookingDetailsModel>() {
+            override fun areItemsTheSame(
+                oldItem: BookingDetailsModel,
+                newItem: BookingDetailsModel
+            ) = oldItem.id == newItem.id
 
-    private fun formatRupiah(amount: Int): String {
-        val formatter = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
-        formatter.maximumFractionDigits = 0
-        return formatter.format(amount)
+            override fun areContentsTheSame(
+                oldItem: BookingDetailsModel,
+                newItem: BookingDetailsModel
+            ) = oldItem == newItem
+        }
     }
 }

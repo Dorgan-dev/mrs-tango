@@ -1,5 +1,6 @@
 package com.example.mrs_tango.core.data.repository
 
+import com.example.mrs_tango.core.data.model.BookingDetailsModel
 import com.example.mrs_tango.core.data.model.BookingModel
 import com.example.mrs_tango.core.data.remote.SupabaseClient
 import com.example.mrs_tango.core.utils.Result
@@ -51,7 +52,7 @@ class BookingRepository(
             try {
                 val list = SupabaseClient.client.from("bookings")
                     .select {
-                        filter { eq("customer_id", customerId) }
+                        filter { eq("user_id", customerId) }
                         order(column = "created_at", order = Order.DESCENDING)
                     }
                     .decodeList<BookingModel>()
@@ -83,6 +84,63 @@ class BookingRepository(
                 Result.Success(true)
             } catch (e: Exception) {
                 Result.Error(e.message ?: "Gagal membatalkan booking")
+            }
+        }
+    }
+
+    // Ambil riwayat booking lengkap dengan nama device & info refund
+    suspend fun getCustomerBookingsWithDetails(customerId: String): Result<List<BookingDetailsModel>> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val columns = io.github.jan.supabase.postgrest.query.Columns.raw(
+                    "*, devices(name, consol_type), refunds(*)"
+                )
+                val list = SupabaseClient.client.from("bookings")
+                    .select(columns = columns) {
+                        filter { eq("customer_id", customerId) }
+                        order(column = "created_at", order = Order.DESCENDING)
+                    }
+                    .decodeList<BookingDetailsModel>()
+                Result.Success(list)
+            } catch (e: Exception) {
+                Result.Error(e.message ?: "Gagal memuat riwayat booking")
+            }
+        }
+    }
+
+    // Ganti foto bukti DP (selama status masih pending) & hapus file lama agar hemat storage
+    suspend fun updateBookingDpProof(
+        bookingId: String,
+        customerId: String,
+        newProofBytes: ByteArray,
+        oldProofUrl: String?
+    ): Result<Boolean> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val uploadResult = storageRepository.uploadImage(
+                    bucketName = "dp-proofs",
+                    folderPrefix = "dp_$customerId",
+                    bytes = newProofBytes
+                )
+                if (uploadResult is Result.Error) {
+                    return@withContext Result.Error(uploadResult.message)
+                }
+                val newUrl = (uploadResult as Result.Success).data.publicUrl
+                SupabaseClient.client.from("bookings").update(
+                    mapOf("dp_proof_file" to newUrl)
+                ) {
+                    filter { eq("id", bookingId) }
+                }
+                // Hapus bukti transfer lama dari bucket dp-proofs
+                if (!oldProofUrl.isNullOrBlank() && oldProofUrl.contains("/dp-proofs/")) {
+                    val oldFileName = oldProofUrl.substringAfter("/dp-proofs/")
+                    if (oldFileName.isNotBlank()) {
+                        storageRepository.deleteImage("dp-proofs", oldFileName)
+                    }
+                }
+                Result.Success(true)
+            } catch (e: Exception) {
+                Result.Error(e.message ?: "Gagal memperbarui bukti transfer DP")
             }
         }
     }

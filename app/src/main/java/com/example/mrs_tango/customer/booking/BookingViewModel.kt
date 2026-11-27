@@ -9,9 +9,9 @@ import com.example.mrs_tango.core.data.repository.DeviceRepository
 import com.example.mrs_tango.core.data.repository.SettingsRepository
 import com.example.mrs_tango.core.utils.Result
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-
 
 sealed class BookingFormInitState {
     object Loading : BookingFormInitState()
@@ -23,18 +23,9 @@ sealed class BookingFormInitState {
     data class Error(val message: String) : BookingFormInitState()
 }
 
-sealed class BookingHistoryState {
-    object Loading : BookingHistoryState()
-    data class Success(
-        val bookings: List<BookingModel>
-    ) : BookingHistoryState()
-    data class Error(val message: String) : BookingHistoryState()
-}
-
 sealed class BookingActionState {
     object Idle : BookingActionState()
     object Loading : BookingActionState()
-
     data class Success(val message: String) : BookingActionState()
     data class Error(val message: String) : BookingActionState()
 }
@@ -47,13 +38,11 @@ class BookingViewModel(
 
     private val _formInitState =
         MutableStateFlow<BookingFormInitState>(BookingFormInitState.Loading)
-    val formInitState = _formInitState.asStateFlow()
-    private val _historyState =
-        MutableStateFlow<BookingHistoryState>(BookingHistoryState.Loading)
-    val historyState = _historyState.asStateFlow()
+    val formInitState: StateFlow<BookingFormInitState> = _formInitState.asStateFlow()
+
     private val _actionState =
         MutableStateFlow<BookingActionState>(BookingActionState.Idle)
-    val actionState = _actionState.asStateFlow()
+    val actionState: StateFlow<BookingActionState> = _actionState.asStateFlow()
 
     // Memuat informasi perangkat dan pengaturan toko sebagai data awal formulir booking.
     fun loadBookingFormData(deviceId: String) {
@@ -91,55 +80,6 @@ class BookingViewModel(
                 }
                 is Result.Error -> {
                     _actionState.value = BookingActionState.Error(result.message)
-                }
-                else -> Unit
-            }
-        }
-    }
-
-    // Mengambil seluruh riwayat booking milik pelanggan berdasarkan ID pelanggan.
-    fun fetchCustomerBookings(customerId: String) {
-        viewModelScope.launch {
-            _historyState.value = BookingHistoryState.Loading
-            when (val result = bookingRepository.getCustomerBookings(customerId)) {
-                is Result.Success -> {
-                    _historyState.value =
-                        BookingHistoryState.Success(result.data)
-                }
-                is Result.Error -> {
-                    _historyState.value =
-                        BookingHistoryState.Error(result.message)
-                }
-                else -> Unit
-            }
-        }
-    }
-
-    // Membatalkan booking berdasarkan ID dan alasan, kemudian memperbarui riwayat booking pelanggan.
-    fun cancelBooking(
-        bookingId: String,
-        reason: String,
-        customerId: String
-    ) {
-        if (reason.isBlank()) {
-            _actionState.value = BookingActionState.Error(
-                "Alasan pembatalan wajib diisi"
-            )
-            return
-        }
-
-        viewModelScope.launch {
-            _actionState.value = BookingActionState.Loading
-            when (val result = bookingRepository.cancelBooking(bookingId, reason)) {
-                is Result.Success -> {
-                    _actionState.value = BookingActionState.Success(
-                        "Booking berhasil dibatalkan"
-                    )
-                    fetchCustomerBookings(customerId)
-                }
-                is Result.Error -> {
-                    _actionState.value =
-                        BookingActionState.Error(result.message)
                 }
                 else -> Unit
             }
