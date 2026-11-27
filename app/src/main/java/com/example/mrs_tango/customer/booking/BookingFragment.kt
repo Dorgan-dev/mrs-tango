@@ -3,506 +3,303 @@ package com.example.mrs_tango.customer.booking
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import android.widget.Toast
-import androidx.core.widget.addTextChangedListener
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import coil.load
+import com.example.mrs_tango.R
 import com.example.mrs_tango.core.data.model.BookingModel
+import com.example.mrs_tango.core.data.model.DeviceDetailsModel
+import com.example.mrs_tango.core.utils.ImageCompressor
+import com.example.mrs_tango.core.utils.QrCodeGenerator
+import com.example.mrs_tango.core.utils.toRupiah
 import com.example.mrs_tango.databinding.FragmentBookingBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
-import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import java.util.TimeZone
 
 class BookingFragment : Fragment() {
 
     private var _binding: FragmentBookingBinding? = null
     private val binding get() = _binding!!
-
     private val viewModel: BookingViewModel by viewModels()
-
     private var deviceId: String = ""
-    private var deviceName: String = ""
-
-    // Gunakan Double secara konsisten
-    private var pricePerHour: Double = 15000.0
-
+    private var currentDevice: DeviceDetailsModel? = null
     private var selectedDate: String = ""
-    private var selectedStartHour: Int = -1
-    private var selectedStartMinute: Int = -1
-    private var selectedStartTime: String = ""
-
-    private var calculatedEndTime: String? = null
-    private var calculatedDurationMinutes: Int? = null
+    private var selectedHour: Int = 12
+    private var selectedMinute: Int = 0
+    private var selectedDurationHours: Int = 1
+    private var selectedTimeType: String = "per_hour" // "per_hour" atau "free_play"
+    private var selectedProofUri: Uri? = null
     private var calculatedEstimatedCost: Int? = null
+    private var calculatedDpAmount: Int = 0
 
-    companion object {
-        private const val ARG_DEVICE_ID = "arg_device_id"
-        private const val ARG_DEVICE_NAME = "arg_device_name"
-        private const val ARG_PRICE_PER_HOUR = "arg_price_per_hour"
-
-        fun newInstance(
-            deviceId: String,
-            deviceName: String,
-            pricePerHour: Double
-        ): BookingFragment {
-            return BookingFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_DEVICE_ID, deviceId)
-                    putString(ARG_DEVICE_NAME, deviceName)
-                    putDouble(ARG_PRICE_PER_HOUR, pricePerHour)
-                }
-            }
-        }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        arguments?.let {
-            deviceId = it.getString(ARG_DEVICE_ID, "")
-            deviceName = it.getString(ARG_DEVICE_NAME, "Perangkat")
-            pricePerHour = it.getDouble(ARG_PRICE_PER_HOUR, 15000.0)
+    private val pickProofLauncher = registerForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            selectedProofUri = uri
+            binding.ivDpProofPreview.load(uri) { crossfade(true) }
+            binding.tvPickDpHint.text = "Ganti foto bukti transfer"
         }
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentBookingBinding.inflate(inflater, container, false)
         return binding.root
     }
 
-    override fun onViewCreated(
-        view: View,
-        savedInstanceState: Bundle?
-    ) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupHeader()
-        setupTimeTypeDropdown()
+        deviceId = arguments?.getString("EXTRA_DEVICE_ID") ?: ""
+        if (deviceId.isEmpty()) {
+            Toast.makeText(requireContext(), "ID perangkat tidak ditemukan", Toast.LENGTH_SHORT).show()
+            parentFragmentManager.popBackStack()
+            return
+        }
+
+        initDefaultDateTime()
         setupListeners()
         observeViewModel()
-        recalculateSummary()
+        viewModel.loadBookingFormData(deviceId)
     }
 
-    private fun setupHeader() {
-        binding.tvSelectedDeviceName.text = deviceName
+    private fun initDefaultDateTime() {
+        val calendar = Calendar.getInstance()
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+        selectedDate = dateFormat.format(calendar.time)
+        selectedHour = calendar.get(Calendar.HOUR_OF_DAY)
+        selectedMinute = 0
 
-        binding.tvDeviceRate.text =
-            "Tarif: ${formatRupiah(pricePerHour)} / jam"
-    }
-
-    private fun setupTimeTypeDropdown() {
-
-        val options = listOf("hourly", "open_bill")
-
-        val adapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_dropdown_item_1line,
-            options
-        )
-
-        binding.actvTimeType.setAdapter(adapter)
-
-        // Default booking
-        binding.actvTimeType.setText("hourly", false)
-
-        binding.actvTimeType.setOnItemClickListener { _, _, position, _ ->
-
-            val selectedType = options[position]
-
-            binding.tilDuration.visibility =
-                if (selectedType == "open_bill") {
-                    View.GONE
-                } else {
-                    View.VISIBLE
-                }
-
-            recalculateSummary()
-        }
+        // Sesuaikan ID etDate & etStartTime jika di fragment_booking.xml berbeda
+        binding.etUsageDate.setText(selectedDate)
+        binding.etStartTime.setText(String.format(Locale.US, "%02d:%02d", selectedHour, selectedMinute))
+        binding.tilDuration.editText?.setText(selectedDurationHours.toString())
     }
 
     private fun setupListeners() {
-
+        // 1. Pilih Tanggal Main
         binding.etUsageDate.setOnClickListener {
-            showDatePicker()
+            val calendar = Calendar.getInstance()
+            val picker = DatePickerDialog(
+                requireContext(),
+                { _, year, month, dayOfMonth ->
+                    selectedDate = String.format(Locale.US, "%04d-%02d-%02d", year, month + 1, dayOfMonth)
+                    binding.etUsageDate.setText(selectedDate)
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            )
+            picker.datePicker.minDate = System.currentTimeMillis() - 1000
+            picker.show()
         }
 
+        // 2. Pilih Jam Mulai (Format 24 Jam)
         binding.etStartTime.setOnClickListener {
-            showTimePicker()
+            TimePickerDialog(
+                requireContext(),
+                { _, hourOfDay, minute ->
+                    selectedHour = hourOfDay
+                    selectedMinute = minute
+                    binding.etStartTime.setText(String.format(Locale.US, "%02d:%02d", hourOfDay, minute))
+                    recalculatePriceAndDp()
+                },
+                selectedHour,
+                selectedMinute,
+                true
+            ).show()
         }
 
-        binding.etDurationHours.addTextChangedListener {
-            recalculateSummary()
+        // 3. Ubah Durasi Jam Main
+        binding.tilDuration.editText?.doAfterTextChanged { editable ->
+            val hours = editable?.toString()?.toIntOrNull()
+            selectedDurationHours = if (hours != null && hours > 0) hours else 1
+            recalculatePriceAndDp()
         }
 
-        binding.btnSubmitBooking.setOnClickListener {
-            submitBooking()
-        }
-    }
-
-    private fun showDatePicker() {
-
-        val calendar = Calendar.getInstance()
-
-        val dialog = DatePickerDialog(
-            requireContext(),
-            { _, year, month, dayOfMonth ->
-
-                selectedDate = String.format(
-                    Locale.US,
-                    "%04d-%02d-%02d",
-                    year,
-                    month + 1,
-                    dayOfMonth
-                )
-
-                binding.etUsageDate.setText(selectedDate)
-
-                recalculateSummary()
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        )
-
-        dialog.datePicker.minDate = System.currentTimeMillis() - 1000
-
-        dialog.show()
-    }
-
-    private fun showTimePicker() {
-
-        val calendar = Calendar.getInstance()
-
-        TimePickerDialog(
-            requireContext(),
-            { _, hourOfDay, minute ->
-
-                selectedStartHour = hourOfDay
-                selectedStartMinute = minute
-
-                selectedStartTime = String.format(
-                    Locale.US,
-                    "%02d:%02d:00",
-                    hourOfDay,
-                    minute
-                )
-
-                binding.etStartTime.setText(
-                    String.format(
-                        Locale.US,
-                        "%02d:%02d",
-                        hourOfDay,
-                        minute
-                    )
-                )
-
-                recalculateSummary()
-            },
-            calendar.get(Calendar.HOUR_OF_DAY),
-            calendar.get(Calendar.MINUTE),
-            true
-        ).show()
-    }
-
-    private fun recalculateSummary() {
-
-        val timeType = binding.actvTimeType.text.toString()
-
-        // Open Bill
-        if (timeType == "open_bill") {
-
-            calculatedEndTime = null
-            calculatedDurationMinutes = null
-            calculatedEstimatedCost = null
-
-            binding.tvEndTimeInfo.text =
-                "Perkiraan Selesai: Open Bill (Fleksibel)"
-
-            binding.tvEstimatedCost.text =
-                "Estimasi Biaya: Dihitung saat selesai"
-
-            return
+        // 4. Pilih Tipe Booking (Per Jam vs Open Bill)
+        binding.rgBookingType.setOnCheckedChangeListener { _, checkedId ->
+            selectedTimeType = if (checkedId == R.id.rbOpenBill) "free_play" else "per_hour"
+            binding.tilDuration.visibility = if (selectedTimeType == "per_hour") View.VISIBLE else View.GONE
+            recalculatePriceAndDp()
         }
 
-        val hours = binding.etDurationHours.text
-            .toString()
-            .toIntOrNull() ?: 0
-
-        if (hours <= 0) {
-
-            calculatedEndTime = null
-            calculatedDurationMinutes = null
-            calculatedEstimatedCost = 0
-
-            binding.tvEndTimeInfo.text =
-                "Perkiraan Selesai: -"
-
-            binding.tvEstimatedCost.text =
-                "Estimasi Biaya: ${formatRupiah(0.0)}"
-
-            return
-        }
-
-        // Hitung durasi
-        val durationMinutes = hours * 60
-
-        calculatedDurationMinutes = durationMinutes
-
-        // Hitung biaya
-        val estimatedCost = hours * pricePerHour
-
-        calculatedEstimatedCost = estimatedCost.toInt()
-
-        binding.tvEstimatedCost.text =
-            "Estimasi Biaya: ${formatRupiah(estimatedCost)}"
-
-        // Hitung waktu selesai
-        if (
-            selectedStartHour != -1 &&
-            selectedStartMinute != -1
-        ) {
-
-            val calendar = Calendar.getInstance().apply {
-
-                set(Calendar.HOUR_OF_DAY, selectedStartHour)
-                set(Calendar.MINUTE, selectedStartMinute)
-                set(Calendar.SECOND, 0)
-                set(Calendar.MILLISECOND, 0)
-
-                add(Calendar.MINUTE, durationMinutes)
-            }
-
-            val endHour = calendar.get(Calendar.HOUR_OF_DAY)
-            val endMinute = calendar.get(Calendar.MINUTE)
-
-            calculatedEndTime = String.format(
-                Locale.US,
-                "%02d:%02d:00",
-                endHour,
-                endMinute
+        // 5. Pilih Foto Bukti Transfer DP
+        binding.cardPickDpProof.setOnClickListener {
+            pickProofLauncher.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
             )
+        }
 
-            val endDate = SimpleDateFormat(
-                "yyyy-MM-dd",
-                Locale.US
-            ).format(calendar.time)
+        // 6. Tombol Konfirmasi Booking
+        binding.btnConfirmBooking.setOnClickListener {
+            validateAndSubmit()
+        }
+    }
 
-            val nextDay = endDate != selectedDate
+    private fun recalculatePriceAndDp() {
+        val device = currentDevice ?: return
 
-            binding.tvEndTimeInfo.text =
-                if (nextDay) {
-                    String.format(
-                        Locale.US,
-                        "Perkiraan Selesai: %02d:%02d (Hari berikutnya)",
-                        endHour,
-                        endMinute
-                    )
-                } else {
-                    String.format(
-                        Locale.US,
-                        "Perkiraan Selesai: %02d:%02d",
-                        endHour,
-                        endMinute
-                    )
-                }
+        if (selectedTimeType == "per_hour") {
+            val total = device.calculateTotalCost(selectedHour, selectedMinute, selectedDurationHours)
+            val dp = total / 2
 
+            calculatedEstimatedCost = total
+            calculatedDpAmount = dp
+
+            binding.tvEstimatedTotal.text = "Estimasi Total ($selectedDurationHours Jam): ${total.toRupiah()}"
+            binding.tvDpRequired.text = "Wajib DP (50%): ${dp.toRupiah()}"
         } else {
+            val firstHourRate = device.getRateAt(selectedHour, selectedMinute)?.pricePerHour ?: 0
 
-            calculatedEndTime = null
+            calculatedEstimatedCost = null
+            calculatedDpAmount = firstHourRate
 
-            binding.tvEndTimeInfo.text =
-                "Perkiraan Selesai: Pilih jam mulai dulu"
+            binding.tvEstimatedTotal.text = "Estimasi Total: Dihitung saat selesai (Open Bill)"
+            binding.tvDpRequired.text = "Wajib DP (Tarif 1 Jam): ${firstHourRate.toRupiah()}"
         }
     }
 
-    private fun submitBooking() {
+    private fun validateAndSubmit() {
+        val prefs = requireContext().getSharedPreferences("user_pref", Context.MODE_PRIVATE)
+        val customerId = prefs.getString("user_id", "") ?: ""
 
-        val prefs = requireContext().getSharedPreferences(
-            "user_pref",
-            Context.MODE_PRIVATE
-        )
+        if (customerId.isEmpty()) {
+            Toast.makeText(requireContext(), "Silakan login ulang terlebih dahulu", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (selectedDate.isEmpty()) {
+            Toast.makeText(requireContext(), "Pilih tanggal bermain terlebih dahulu", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (selectedTimeType == "per_hour") {
+            val rawDuration = binding.tilDuration.editText?.text?.toString()?.toIntOrNull() ?: 0
+            if (rawDuration <= 0) {
+                binding.tilDuration.error = "Durasi minimal 1 jam"
+                return
+            }
+            binding.tilDuration.error = null
+        }
 
-        val customerId = prefs.getString("user_id", null)
-
-        if (customerId.isNullOrEmpty()) {
-            showAlert(
-                "Sesi Kosong",
-                "user_id tidak ditemukan. Silakan login ulang."
-            )
+        val proofUri = selectedProofUri
+        if (proofUri == null) {
+            Toast.makeText(requireContext(), "Unggah foto bukti transfer DP terlebih dahulu", Toast.LENGTH_SHORT).show()
             return
         }
 
-        if (deviceId.isEmpty()) {
-            showAlert(
-                "Device ID Kosong",
-                "ID perangkat belum dikirim ke halaman booking."
-            )
+        val compressedBytes = ImageCompressor.compressUri(requireContext(), proofUri, maxDimension = 1024, quality = 75)
+        if (compressedBytes == null) {
+            Toast.makeText(requireContext(), "Gagal memproses gambar bukti transfer", Toast.LENGTH_SHORT).show()
             return
         }
 
-        if (selectedDate.isEmpty() || selectedStartTime.isEmpty()) {
-            showAlert(
-                "Data Belum Lengkap",
-                "Pilih tanggal dan jam mulai terlebih dahulu."
-            )
-            return
+        val startTimeStr = String.format(Locale.US, "%02d:%02d:00", selectedHour, selectedMinute)
+        val endTimeStr = if (selectedTimeType == "per_hour") {
+            val endHour = (selectedHour + selectedDurationHours) % 24
+            String.format(Locale.US, "%02d:%02d:00", endHour, selectedMinute)
+        } else {
+            null
         }
+        val durationMins = if (selectedTimeType == "per_hour") selectedDurationHours * 60 else null
 
-        // Validasi tanggal dan jam tidak boleh di masa lalu
-        val selectedCalendar = Calendar.getInstance().apply {
-
-            set(
-                selectedDate.substring(0, 4).toInt(),
-                selectedDate.substring(5, 7).toInt() - 1,
-                selectedDate.substring(8, 10).toInt(),
-                selectedStartHour,
-                selectedStartMinute,
-                0
-            )
+        val expiresCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+            add(Calendar.MINUTE, 15)
         }
-
-        if (selectedCalendar.timeInMillis < System.currentTimeMillis()) {
-            showAlert(
-                "Waktu Tidak Valid",
-                "Tanggal dan jam booking tidak boleh di masa lalu."
-            )
-            return
+        val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
         }
-
-        val timeType = binding.actvTimeType.text
-            .toString()
-            .ifEmpty { "hourly" }
-
-        if (timeType !in listOf("hourly", "open_bill")) {
-            showAlert(
-                "Jenis Booking Tidak Valid",
-                "Silakan pilih jenis booking terlebih dahulu."
-            )
-            return
-        }
-
-        if (
-            timeType == "hourly" &&
-            (calculatedDurationMinutes == null ||
-                    calculatedDurationMinutes!! <= 0)
-        ) {
-
-            binding.etDurationHours.error =
-                "Masukkan durasi minimal 1 jam"
-
-            return
-        }
-
-        if (timeType == "hourly" && calculatedEndTime == null) {
-            showAlert(
-                "Data Belum Lengkap",
-                "Silakan pilih jam mulai dan durasi booking."
-            )
-            return
-        }
-
-        val newBooking = BookingModel(
+        val booking = BookingModel(
             deviceId = deviceId,
             customerId = customerId,
             usageDate = selectedDate,
-            startTime = selectedStartTime,
-            timeType = timeType,
-            endTime = calculatedEndTime,
-            durationMinutes = calculatedDurationMinutes,
+            startTime = startTimeStr,
+            timeType = selectedTimeType,
+            endTime = endTimeStr,
+            durationMinutes = durationMins,
             estimatedCost = calculatedEstimatedCost,
-            status = "pending"
+            dpAmount = calculatedDpAmount,
+            status = "pending",
+            expiresAt = isoFormat.format(expiresCalendar.time)
         )
-
-        viewModel.createBooking(newBooking)
-    }
-
-    private fun showAlert(
-        title: String,
-        message: String
-    ) {
-
-        if (!isAdded) return
-
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(title)
-            .setMessage(message)
-            .setPositiveButton("OK", null)
-            .show()
+        viewModel.submitBooking(booking, compressedBytes)
     }
 
     private fun observeViewModel() {
-
         viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-            viewLifecycleOwner.repeatOnLifecycle(
-                Lifecycle.State.STARTED
-            ) {
+                launch {
+                    viewModel.formInitState.collect { state ->
+                        when (state) {
+                            is BookingFormInitState.Loading -> {
+                                binding.btnConfirmBooking.isEnabled = false
+                            }
+                            is BookingFormInitState.Ready -> {
+                                binding.btnConfirmBooking.isEnabled = true
+                                currentDevice = state.device
+                                binding.tvDeviceTitle.text = state.device.name
+                                binding.tvStorePaymentTitle.text = "Scan QRIS — ${state.storeName}"
 
-                viewModel.actionState.collect { state ->
+                                val qrBitmap = QrCodeGenerator.generateBitmap(state.qrisString)
+                                if (qrBitmap != null) {
+                                    binding.ivQrisCode.setImageBitmap(qrBitmap)
+                                }
 
-                    when (state) {
-
-                        is BookingActionState.Loading -> {
-
-                            binding.progressBar.visibility =
-                                View.VISIBLE
-
-                            binding.btnSubmitBooking.isEnabled =
-                                false
+                                recalculatePriceAndDp()
+                            }
+                            is BookingFormInitState.Error -> {
+                                Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
+                            }
                         }
+                    }
+                }
 
-                        is BookingActionState.Success -> {
-
-                            binding.progressBar.visibility =
-                                View.GONE
-
-                            binding.btnSubmitBooking.isEnabled =
-                                true
-
-                            Toast.makeText(
-                                requireContext(),
-                                state.message,
-                                Toast.LENGTH_LONG
-                            ).show()
-
-                            viewModel.resetActionState()
-
-                            parentFragmentManager.popBackStack()
-                        }
-
-                        is BookingActionState.Error -> {
-
-                            binding.progressBar.visibility =
-                                View.GONE
-
-                            binding.btnSubmitBooking.isEnabled =
-                                true
-
-                            showAlert(
-                                "Booking Gagal",
-                                state.message
-                            )
-
-                            viewModel.resetActionState()
-                        }
-
-                        is BookingActionState.Idle -> {
-                            // Tidak ada tindakan
+                launch {
+                    viewModel.actionState.collect { state ->
+                        when (state) {
+                            is BookingActionState.Loading -> {
+                                binding.btnConfirmBooking.isEnabled = false
+                                binding.btnConfirmBooking.text = "Mengunggah & Mengirim..."
+                            }
+                            is BookingActionState.Success -> {
+                                binding.btnConfirmBooking.isEnabled = true
+                                binding.btnConfirmBooking.text = "Konfirmasi Booking"
+                                MaterialAlertDialogBuilder(requireContext())
+                                    .setTitle("Pesanan Terkirim")
+                                    .setMessage(state.message)
+                                    .setCancelable(false)
+                                    .setPositiveButton("OK") { _, _ ->
+                                        parentFragmentManager.popBackStack()
+                                    }
+                                    .show()
+                                viewModel.resetActionState()
+                            }
+                            is BookingActionState.Error -> {
+                                binding.btnConfirmBooking.isEnabled = true
+                                binding.btnConfirmBooking.text = "Konfirmasi Booking"
+                                Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
+                                viewModel.resetActionState()
+                            }
+                            is BookingActionState.Idle -> {}
                         }
                     }
                 }
@@ -510,21 +307,20 @@ class BookingFragment : Fragment() {
         }
     }
 
-    private fun formatRupiah(amount: Double): String {
-
-        val formatter = NumberFormat.getCurrencyInstance(
-            Locale("in", "ID")
-        )
-
-        formatter.maximumFractionDigits = 0
-        formatter.minimumFractionDigits = 0
-
-        return formatter.format(amount)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-
-        _binding = null
+    companion object {
+        fun newInstance(
+            deviceId: String,
+            deviceName: String? = null,
+            pricePerHour: Double? = null
+        ): BookingFragment {
+            val fragment = BookingFragment()
+            val args = Bundle().apply {
+                putString("EXTRA_DEVICE_ID", deviceId)
+                if (deviceName != null) putString("EXTRA_DEVICE_NAME", deviceName)
+                if (pricePerHour != null) putDouble("EXTRA_PRICE_PER_HOUR", pricePerHour)
+            }
+            fragment.arguments = args
+            return fragment
+        }
     }
 }

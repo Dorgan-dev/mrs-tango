@@ -28,22 +28,23 @@ class BookingHistoryFragment : Fragment() {
 
     private var _binding: FragmentBookingHistoryBinding? = null
     private val binding get() = _binding!!
-
     private val bookingViewModel: BookingViewModel by viewModels()
     private val deviceViewModel: DeviceViewModel by viewModels()
-
     private lateinit var historyAdapter: BookingHistoryAdapter
     private var deviceNameMap: Map<String, String> = emptyMap()
     private var currentCustomerId: String = ""
 
+    // Membuat tampilan fragment menggunakan ViewBinding.
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentBookingHistoryBinding.inflate(inflater, container, false)
         return binding.root
     }
 
+    // Menginisialisasi ID pelanggan, RecyclerView, dan pengamatan perubahan state ViewModel.
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -54,22 +55,26 @@ class BookingHistoryFragment : Fragment() {
         observeViewModels()
     }
 
+    // Memuat daftar perangkat dan riwayat booking pelanggan setiap kali fragment kembali aktif.
     override fun onResume() {
         super.onResume()
         deviceViewModel.fetchDevices()
+
         if (currentCustomerId.isNotEmpty()) {
             bookingViewModel.fetchCustomerBookings(currentCustomerId)
         } else {
-            binding.tvEmptyHistory.text = "Sesi login tidak ditemukan"
-            binding.tvEmptyHistory.visibility = View.VISIBLE
+            binding.tvEmptyHistory.apply {
+                text = "Sesi login tidak ditemukan"
+                visibility = View.VISIBLE
+            }
+            binding.rvBookingHistory.visibility = View.GONE
         }
     }
 
+    // Mengatur RecyclerView dan menghubungkan adapter dengan aksi pembatalan booking.
     private fun setupRecyclerView() {
         historyAdapter = BookingHistoryAdapter(
-            onCancelClick = { booking ->
-                showCancelDialog(booking)
-            }
+            onCancelClick = { booking -> showCancelDialog(booking) }
         )
 
         binding.rvBookingHistory.apply {
@@ -78,13 +83,14 @@ class BookingHistoryFragment : Fragment() {
         }
     }
 
+    // Menampilkan dialog konfirmasi pembatalan booking beserta input alasan pembatalan.
     private fun showCancelDialog(booking: BookingModel) {
         val inputReason = EditText(requireContext()).apply {
             hint = "Masukkan alasan pembatalan"
         }
 
+        val padding = (20 * resources.displayMetrics.density).toInt()
         val container = FrameLayout(requireContext()).apply {
-            val padding = (20 * resources.displayMetrics.density).toInt()
             setPadding(padding, padding / 2, padding, 0)
             addView(inputReason)
         }
@@ -96,8 +102,13 @@ class BookingHistoryFragment : Fragment() {
             .setNegativeButton("Tidak", null)
             .setPositiveButton("Ya, Batalkan") { _, _ ->
                 val reason = inputReason.text.toString().trim()
+
                 if (reason.isEmpty()) {
-                    Toast.makeText(requireContext(), "Alasan pembatalan wajib diisi", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        "Alasan pembatalan wajib diisi",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 } else {
                     booking.id?.let { id ->
                         bookingViewModel.cancelBooking(id, reason, currentCustomerId)
@@ -107,11 +118,12 @@ class BookingHistoryFragment : Fragment() {
             .show()
     }
 
+    // Mengamati perubahan state perangkat, riwayat booking, dan aksi pembatalan selama lifecycle aktif.
     private fun observeViewModels() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-                // 1. Ambil peta deviceId -> deviceName
+                // Mengubah daftar perangkat menjadi peta ID perangkat dan nama perangkat.
                 launch {
                     deviceViewModel.listState.collect { state ->
                         if (state is DeviceListState.Success) {
@@ -129,7 +141,7 @@ class BookingHistoryFragment : Fragment() {
                     }
                 }
 
-                // 2. Amati daftar riwayat booking
+                // Memperbarui tampilan RecyclerView berdasarkan state riwayat booking pelanggan.
                 launch {
                     bookingViewModel.historyState.collect { state ->
                         when (state) {
@@ -141,23 +153,25 @@ class BookingHistoryFragment : Fragment() {
                                 binding.progressBar.visibility = View.GONE
                                 historyAdapter.submitData(state.bookings, deviceNameMap)
 
-                                if (state.bookings.isEmpty()) {
-                                    binding.tvEmptyHistory.visibility = View.VISIBLE
-                                    binding.rvBookingHistory.visibility = View.GONE
-                                } else {
-                                    binding.tvEmptyHistory.visibility = View.GONE
-                                    binding.rvBookingHistory.visibility = View.VISIBLE
-                                }
+                                val isEmpty = state.bookings.isEmpty()
+                                binding.tvEmptyHistory.visibility =
+                                    if (isEmpty) View.VISIBLE else View.GONE
+                                binding.rvBookingHistory.visibility =
+                                    if (isEmpty) View.GONE else View.VISIBLE
                             }
                             is BookingHistoryState.Error -> {
                                 binding.progressBar.visibility = View.GONE
-                                Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
+                                Toast.makeText(
+                                    requireContext(),
+                                    state.message,
+                                    Toast.LENGTH_LONG
+                                ).show()
                             }
                         }
                     }
                 }
 
-                // 3. Amati status aksi pembatalan
+                // Menampilkan hasil proses pembatalan booking berupa pesan berhasil atau gagal.
                 launch {
                     bookingViewModel.actionState.collect { action ->
                         when (action) {
@@ -166,7 +180,11 @@ class BookingHistoryFragment : Fragment() {
                             }
                             is BookingActionState.Success -> {
                                 binding.progressBar.visibility = View.GONE
-                                Toast.makeText(requireContext(), action.message, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    requireContext(),
+                                    action.message,
+                                    Toast.LENGTH_SHORT
+                                ).show()
                                 bookingViewModel.resetActionState()
                             }
                             is BookingActionState.Error -> {
@@ -178,7 +196,7 @@ class BookingHistoryFragment : Fragment() {
                                     .show()
                                 bookingViewModel.resetActionState()
                             }
-                            is BookingActionState.Idle -> {}
+                            is BookingActionState.Idle -> Unit
                         }
                     }
                 }
@@ -186,6 +204,7 @@ class BookingHistoryFragment : Fragment() {
         }
     }
 
+    // Membersihkan referensi ViewBinding ketika tampilan fragment dihancurkan.
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

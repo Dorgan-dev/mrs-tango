@@ -65,4 +65,7 @@ dependencies {
     // Ktor (HTTP client untuk Supabase)
     implementation("io.ktor:ktor-client-android:3.0.0")
     implementation("com.google.android.material:material:1.12.0")
+
+    //string to qr code
+    implementation("com.google.zxing:core:3.5.3")
 }
