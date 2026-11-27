@@ -9,6 +9,7 @@ import java.util.Locale
 data class DeviceModel(
     val id: String? = null,
     val name: String? = null,
+    val description: String? = null, // ini kolom baru
     @SerialName("consol_type")
     val consoleType: String? = null,
     @SerialName("console_sn")

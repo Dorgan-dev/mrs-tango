@@ -9,6 +9,7 @@ import java.util.Calendar
 data class DeviceDetailsModel(
     val id: String,
     val name: String,
+    val description: String? = null, //ini kolom baru
     @SerialName("consol_type")
     val consoleType: String? = null,
     @SerialName("console_sn")

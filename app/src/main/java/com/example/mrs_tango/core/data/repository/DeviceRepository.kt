@@ -19,7 +19,7 @@ class DeviceRepository(
     private val devicesTable = "devices"
     private val deviceImagesTable = "device_images"
     private val deviceRatesTable = "device_rates"
-    private val deviceImagesBucket = "device-images"
+    private val deviceImagesBucket = "devices-images"
 
     // CRUD data perangkat pada tabel devices
 
@@ -118,6 +118,7 @@ class DeviceRepository(
                         set("console_sn", updatedDevice.consoleSn)
                         set("tv_name", updatedDevice.tvName)
                         set("tv_sn", updatedDevice.tvSn)
+                        set("description", updatedDevice.tvSn) //ini kolom baru
                         set("tv_ip_address", updatedDevice.tvIpAddress)
                         set("tv_mac_address", updatedDevice.tvMacAddress)
                         set("status", updatedDevice.status)

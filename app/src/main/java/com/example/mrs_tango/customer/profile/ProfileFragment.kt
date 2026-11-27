@@ -1,20 +1,20 @@
-package com.example.mrs_tango.core.ui.profile
+package com.example.mrs_tango.customer.profile
 
-import android.content.Context.MODE_PRIVATE
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.edit
+import androidx.fragment.app.Fragment
 import com.example.mrs_tango.R
 import com.example.mrs_tango.auth.AuthActivity
 import com.example.mrs_tango.core.base.BaseDrawerActivity
 import com.example.mrs_tango.customer.booking.history.BookingHistoryFragment
 import com.example.mrs_tango.databinding.FragmentProfileBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import androidx.core.content.edit
 
 class ProfileFragment : Fragment() {
     private var _binding: FragmentProfileBinding? = null
@@ -36,7 +36,9 @@ class ProfileFragment : Fragment() {
         }
 
         binding.btnLogout.setOnClickListener {
-            val sharedPref = requireContext().getSharedPreferences("user_pref", MODE_PRIVATE)
+            val sharedPref = requireContext().getSharedPreferences("user_pref",
+                Context.MODE_PRIVATE
+            )
 
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Konfirmasi")

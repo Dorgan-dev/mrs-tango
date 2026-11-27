@@ -39,9 +39,7 @@ class DeviceFormFragment(
 
     private var _binding: FragmentDeviceFormBinding? = null
     private val binding get() = _binding!!
-
     private var selectedImageUri: Uri? = null
-
     // Menyimpan daftar shift sementara di form sebelum disimpan ke Supabase
     private val draftRates = mutableListOf<DeviceRateModel>()
     // Menyimpan ID shift lama yang dihapus owner saat mode Edit

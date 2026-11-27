@@ -9,7 +9,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import com.example.mrs_tango.R
 import com.example.mrs_tango.core.base.BaseDrawerActivity
-import com.example.mrs_tango.core.ui.profile.ProfileFragment
+import com.example.mrs_tango.customer.profile.ProfileFragment
 import com.example.mrs_tango.customer.booking.history.BookingHistoryFragment
 import com.example.mrs_tango.customer.home.HomeFragment
 import com.example.mrs_tango.customer.schedule.ScheduleFragment
