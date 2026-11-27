@@ -49,9 +49,10 @@ class BookingHistoryAdapter(
             bindActions(item, currentStatus)
         }
 
+
         // Mengatur label dan warna badge sesuai status booking.
         private fun bindStatus(status: String) {
-            var (label, background, text) = when (status) {
+            val (label, background, text) = when (status) {
                 "pending" -> Triple("MENUNGGU VERIFIKASI", "#FFF8E1", "#F57F17")
                 "confirmed" -> Triple("DIKONFIRMASI", "#E8F5E9", "#1B5E20")
                 "completed" -> Triple("SELESAI", "#E3F2FD", "#1565C0")
@@ -62,7 +63,7 @@ class BookingHistoryAdapter(
             }
 
             binding.tvBookingStatus.apply {
-                text = label
+                this.text = label
                 backgroundTintList = ColorStateList.valueOf(Color.parseColor(background))
                 setTextColor(Color.parseColor(text))
             }
