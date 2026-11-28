@@ -17,6 +17,7 @@ class OwnerActivity : BaseDrawerActivity() {
 
     private lateinit var binding: ActivityOwnerBinding
 
+    // Menginisialisasi binding layout, navigation drawer, serta sinkronisasi ViewPager2 dan BottomNavigationView.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityOwnerBinding.inflate(layoutInflater)
@@ -37,11 +38,12 @@ class OwnerActivity : BaseDrawerActivity() {
         })
 
         binding.bottomNavView.setOnItemSelectedListener { item ->
-            when (item.itemId) { // Ganti ID di bawah ini sesuai dengan ID yang ada di res/menu/bottom_nav_owner.xml
+            when (item.itemId) {
                 R.id.dashboard -> binding.viewPager.currentItem = 0
                 R.id.report -> binding.viewPager.currentItem = 1
                 R.id.device -> binding.viewPager.currentItem = 2
                 R.id.cashier -> binding.viewPager.currentItem = 3
+                R.id.fnb -> binding.viewPager.currentItem = 4
             }
             true
         }
@@ -53,6 +55,7 @@ class OwnerActivity : BaseDrawerActivity() {
             .commit()
     }
 
+    // Mengarahkan navigasi ke halaman atau tab terkait saat item pada drawer dipilih.
     override fun onDrawerItemSelected(itemId: Int) {
         when (itemId) {
             R.id.nav_home -> {

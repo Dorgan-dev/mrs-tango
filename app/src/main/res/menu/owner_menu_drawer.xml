@@ -2,17 +2,21 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_owner_dashboard"
-            android:icon="@android:drawable/ic_menu_agenda"
-            android:title="Dashboard" />
+            android:id="@+id/drawer_owner_dashboard"
+            android:icon="@android:drawable/ic_menu_compass"
+            android:title="Dashboard Ringkasan" />
         <item
-            android:id="@+id/nav_manage_devices"
-            android:icon="@android:drawable/ic_menu_manage"
-            android:title="Kelola Perangkat" />
+            android:id="@+id/drawer_owner_logs"
+            android:icon="@android:drawable/ic_menu_recent_history"
+            android:title="Log Aktivitas Perangkat" />
         <item
-            android:id="@+id/nav_manage_bookings"
-            android:icon="@android:drawable/ic_menu_today"
-            android:title="Pesanan Masuk" />
+            android:id="@+id/drawer_owner_users"
+            android:icon="@android:drawable/ic_menu_myplaces"
+            android:title="Kelola Kasir &amp; Pengguna" />
+        <item
+            android:id="@+id/drawer_owner_settings"
+            android:icon="@android:drawable/ic_menu_preferences"
+            android:title="Pengaturan Toko &amp; QRIS" />
     </group>
 
     <item android:title="Akun">

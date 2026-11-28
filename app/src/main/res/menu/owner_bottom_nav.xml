@@ -20,4 +20,8 @@
         android:icon="@drawable/ic_cashier"
         android:title="Kasir" />
 
+    <item
+        android:id="@+id/fnb"
+        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:title="Menu FnB" />
 </menu>
