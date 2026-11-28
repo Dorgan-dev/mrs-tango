@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="STRUK PEMBAYARAN"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tvReceiptInvoice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:gravity="center"
+        android:text="INV-20261128-0001"
+        android:textColor="#616161"
+        android:textSize="12sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginVertical="12dp"
+        android:background="#E0E0E0" />
+
+    <TextView
+        android:id="@+id/tvReceiptSessionInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Unit: PS5 Unit 1 (60 menit)"
+        android:textColor="@android:color/black"
+        android:textSize="13sp" />
+
+    <TextView
+        android:id="@+id/tvReceiptGamingCost"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="Sewa Konsol: Rp 15.000"
+        android:textColor="#424242"
+        android:textSize="13sp" />
+
+    <TextView
+        android:id="@+id/tvReceiptFnbList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Pesanan FnB:\n• Indomie Goreng x1 = Rp 12.000"
+        android:textColor="#424242"
+        android:textSize="13sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginVertical="12dp"
+        android:background="#E0E0E0" />
+
+    <TextView
+        android:id="@+id/tvReceiptSummary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:lineSpacingExtra="4dp"
+        android:text="Grand Total: Rp 27.000\nDP Dibayar: - Rp 7.500\nSisa Tagihan: Rp 19.500\nTunai Dibayar: Rp 20.000\nKembalian: Rp 500"
+        android:textColor="@android:color/black"
+        android:textSize="13sp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCloseReceipt"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/dark_green"
+        android:text="Tutup"
+        android:textColor="@android:color/white" />
+</LinearLayout>

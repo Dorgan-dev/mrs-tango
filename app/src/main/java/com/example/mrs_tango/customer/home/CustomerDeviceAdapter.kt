@@ -24,6 +24,7 @@ class CustomerDeviceAdapter(
                 crossfade(true)
                 placeholder(R.drawable.ic_launcher_background)
                 error(R.drawable.ic_launcher_background)
+                fallback(R.drawable.ic_launcher_background)
             }
 
             binding.root.setOnClickListener {

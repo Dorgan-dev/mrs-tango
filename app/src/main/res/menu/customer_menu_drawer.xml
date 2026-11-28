@@ -10,6 +10,14 @@
             android:icon="@android:drawable/ic_menu_recent_history"
             android:title="Riwayat Booking" />
         <item
+            android:id="@+id/nav_fnb_catalog"
+            android:icon="@android:drawable/ic_menu_sort_by_size"
+            android:title="Menu Makanan &amp; Minuman" />
+        <item
+            android:id="@+id/nav_transactions"
+            android:icon="@android:drawable/ic_menu_agenda"
+            android:title="Riwayat Transaksi &amp; Struk" />
+        <item
             android:id="@+id/nav_profile"
             android:icon="@android:drawable/ic_menu_myplaces"
             android:title="Profil Saya" />

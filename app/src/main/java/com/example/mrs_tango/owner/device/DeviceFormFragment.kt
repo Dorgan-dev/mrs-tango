@@ -40,14 +40,10 @@ class DeviceFormFragment(
     private var _binding: FragmentDeviceFormBinding? = null
     private val binding get() = _binding!!
     private var selectedImageUri: Uri? = null
-    // Menyimpan daftar shift sementara di form sebelum disimpan ke Supabase
     private val draftRates = mutableListOf<DeviceRateModel>()
-    // Menyimpan ID shift lama yang dihapus owner saat mode Edit
     private val deletedRateIds = mutableListOf<String>()
 
-    private val pickMedia = registerForActivityResult(
-        ActivityResultContracts.PickVisualMedia()
-    ) { uri ->
+    private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
             selectedImageUri = uri
             binding.ivDevicePreview.load(uri) { crossfade(true) }
@@ -55,15 +51,13 @@ class DeviceFormFragment(
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    // Method ini digunakan untuk menginisialisasi tampilan form perangkat menggunakan View Binding.
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentDeviceFormBinding.inflate(inflater, container, false)
         return binding.root
     }
 
+    // Method ini digunakan untuk menyiapkan dropdown, mengisi data perangkat yang sudah ada, dan mengatur event listener.
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupDropdowns()
@@ -71,21 +65,25 @@ class DeviceFormFragment(
         setupListeners()
     }
 
+    // Method ini digunakan untuk mengatur pilihan status perangkat dan jenis konsol pada dropdown.
     private fun setupDropdowns() {
-        val statusOptions = listOf("available", "in_use", "maintenance")
-        val statusAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, statusOptions)
-        binding.actvStatus.setAdapter(statusAdapter)
-
-        val consoleOptions = listOf("PS5 Disc", "PS5 Digital", "PS4 Pro", "PS4 Slim", "Nintendo Switch", "Xbox Series X")
-        val consoleAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, consoleOptions)
-        binding.actvConsoleType.setAdapter(consoleAdapter)
+        binding.actvStatus.setAdapter(
+            ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, listOf("available", "in_use", "maintenance"))
+        )
+        binding.actvConsoleType.setAdapter(
+            ArrayAdapter(
+                requireContext(),
+                android.R.layout.simple_dropdown_item_1line,
+                listOf("PS5 Disc", "PS5 Digital", "PS4 Pro", "PS4 Slim", "Nintendo Switch", "Xbox Series X")
+            )
+        )
     }
 
+    // Method ini digunakan untuk mengisi form dengan data perangkat dan tarif yang sudah tersimpan atau menampilkan form kosong untuk perangkat baru.
     private fun populateExistingData() {
         if (existingDevice != null) {
             binding.tvFormTitle.text = "Edit Perangkat"
             binding.btnSaveDevice.text = "Simpan Perubahan"
-
             binding.etName.setText(existingDevice.name)
             binding.actvStatus.setText(existingDevice.status ?: "available", false)
             binding.actvConsoleType.setText(existingDevice.consoleType, false)
@@ -95,9 +93,8 @@ class DeviceFormFragment(
             binding.etTvIp.setText(existingDevice.tvIpAddress)
             binding.etTvMac.setText(existingDevice.tvMacAddress)
 
-            // Muat semua shift tarif aktif milik device ini
             draftRates.clear()
-            draftRates.addAll(existingDevice.rates.filter { it.isActive })
+            draftRates.addAll(existingDevice.activeRates)
 
             existingDevice.primaryImageUrl?.let { url ->
                 binding.ivDevicePreview.load(url) {
@@ -110,84 +107,67 @@ class DeviceFormFragment(
             binding.tvFormTitle.text = "Tambah Perangkat Baru"
             binding.btnSaveDevice.text = "Simpan Perangkat"
         }
-
         renderRateList()
     }
 
+    // Method ini digunakan untuk mengatur aksi pemilihan foto, penambahan tarif, serta validasi dan penyimpanan data perangkat.
     private fun setupListeners() {
         binding.cardSelectImage.setOnClickListener {
-            pickMedia.launch(
-                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-            )
+            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
-
         binding.btnAddRate.setOnClickListener {
             showRateDialog(existingRate = null, editIndex = null)
         }
-
         binding.btnSaveDevice.setOnClickListener {
             val name = binding.etName.text.toString().trim()
             if (name.isEmpty()) {
                 binding.etName.error = "Nama unit tidak boleh kosong"
                 return@setOnClickListener
             }
-
             if (draftRates.isEmpty()) {
                 Toast.makeText(requireContext(), "Tambahkan minimal 1 tarif perangkat", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            val deviceData = DeviceModel(
-                id = existingDevice?.id,
-                name = name,
-                status = binding.actvStatus.text.toString().trim().ifEmpty { "available" },
-                consoleType = binding.actvConsoleType.text.toString().trim().ifEmpty { null },
-                consoleSn = binding.etConsoleSn.text.toString().trim().ifEmpty { null },
-                tvName = binding.etTvName.text.toString().trim().ifEmpty { null },
-                tvSn = binding.etTvSn.text.toString().trim().ifEmpty { null },
-                tvIpAddress = binding.etTvIp.text.toString().trim().ifEmpty { null },
-                tvMacAddress = binding.etTvMac.text.toString().trim().ifEmpty { null }
+            saveAllData(
+                DeviceModel(
+                    id = existingDevice?.id,
+                    name = name,
+                    status = binding.actvStatus.text.toString().trim().ifEmpty { "available" },
+                    consoleType = binding.actvConsoleType.text.toString().trim().ifEmpty { null },
+                    consoleSn = binding.etConsoleSn.text.toString().trim().ifEmpty { null },
+                    tvName = binding.etTvName.text.toString().trim().ifEmpty { null },
+                    tvSn = binding.etTvSn.text.toString().trim().ifEmpty { null },
+                    tvIpAddress = binding.etTvIp.text.toString().trim().ifEmpty { null },
+                    tvMacAddress = binding.etTvMac.text.toString().trim().ifEmpty { null }
+                )
             )
-
-            saveAllData(deviceData)
         }
     }
 
+    // Method ini digunakan untuk menampilkan daftar tarif perangkat beserta informasi dan tombol edit maupun hapus.
     private fun renderRateList() {
         binding.llRatesContainer.removeAllViews()
         binding.tvEmptyRates.isVisible = draftRates.isEmpty()
 
         draftRates.forEachIndexed { index, rate ->
-            val itemBinding = ItemDeviceRateFormBinding.inflate(
-                layoutInflater,
-                binding.llRatesContainer,
-                false
-            )
-
+            val itemBinding = ItemDeviceRateFormBinding.inflate(layoutInflater, binding.llRatesContainer, false)
             itemBinding.tvRateName.text = rate.rateName
             itemBinding.tvRateTime.text = rate.timeRangeFormatted
             itemBinding.tvRatePrice.text = "${formatRupiah(rate.pricePerHour)}/jam"
-
-            // Ketuk kartu untuk edit shift
-            itemBinding.root.setOnClickListener {
-                showRateDialog(existingRate = rate, editIndex = index)
-            }
-
-            // Ketuk tombol hapus
+            itemBinding.root.setOnClickListener { showRateDialog(existingRate = rate, editIndex = index) }
             itemBinding.btnDeleteRate.setOnClickListener {
                 rate.id?.let { deletedRateIds.add(it) }
                 draftRates.removeAt(index)
                 renderRateList()
             }
-
             binding.llRatesContainer.addView(itemBinding.root)
         }
     }
 
+    // Method ini digunakan untuk menampilkan dialog tambah atau edit tarif serta memvalidasi data tarif sebelum disimpan ke daftar sementara.
     private fun showRateDialog(existingRate: DeviceRateModel?, editIndex: Int?) {
         val dialogBinding = DialogRateFormBinding.inflate(layoutInflater)
-
-        // Format tersimpan untuk database: "HH:mm:00"
         var selectedStartTime: String? = existingRate?.effectiveFrom
         var selectedEndTime: String? = existingRate?.effectiveUntil
 
@@ -204,7 +184,6 @@ class DeviceFormFragment(
                 dialogBinding.etStartTime.setText(display)
             }
         }
-
         dialogBinding.etEndTime.setOnClickListener {
             openTimePicker("Pilih Jam Selesai", selectedEndTime) { display, dbTime ->
                 selectedEndTime = dbTime
@@ -220,8 +199,6 @@ class DeviceFormFragment(
             .create()
 
         dialog.show()
-
-        // Override tombol positif agar dialog tidak tertutup jika input belum valid
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             val rateName = dialogBinding.etRateName.text.toString().trim()
             val price = dialogBinding.etRatePrice.text.toString().toIntOrNull() ?: 0
@@ -230,16 +207,10 @@ class DeviceFormFragment(
                 dialogBinding.etRateName.error = "Nama shift wajib diisi"
                 return@setOnClickListener
             }
-
             if ((selectedStartTime == null) != (selectedEndTime == null)) {
-                Toast.makeText(
-                    requireContext(),
-                    "Isi kedua jam mulai & selesai, atau kosongkan keduanya untuk tarif 24 jam",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(requireContext(), "Isi kedua jam mulai & selesai, atau kosongkan keduanya untuk tarif 24 jam", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-
             if (price <= 0) {
                 dialogBinding.etRatePrice.error = "Masukkan harga per jam yang valid"
                 return@setOnClickListener
@@ -255,112 +226,71 @@ class DeviceFormFragment(
                 isActive = true
             )
 
-            if (editIndex != null) {
-                draftRates[editIndex] = updatedRate
-            } else {
-                draftRates.add(updatedRate)
-            }
-
+            if (editIndex != null) draftRates[editIndex] = updatedRate else draftRates.add(updatedRate)
             renderRateList()
             dialog.dismiss()
         }
     }
 
-    private fun openTimePicker(
-        title: String,
-        currentDbTime: String?,
-        onPicked: (displayTime: String, dbTime: String) -> Unit
-    ) {
+    // Method ini digunakan untuk menampilkan pemilih waktu dan mengembalikan waktu yang dipilih dalam format tampilan dan format database.
+    private fun openTimePicker(title: String, currentDbTime: String?, onPicked: (displayTime: String, dbTime: String) -> Unit) {
         val parts = currentDbTime?.split(":")
-        val defaultHour = parts?.getOrNull(0)?.toIntOrNull() ?: 8
-        val defaultMinute = parts?.getOrNull(1)?.toIntOrNull() ?: 0
-
         val picker = MaterialTimePicker.Builder()
             .setTimeFormat(TimeFormat.CLOCK_24H)
-            .setHour(defaultHour)
-            .setMinute(defaultMinute)
+            .setHour(parts?.getOrNull(0)?.toIntOrNull() ?: 8)
+            .setMinute(parts?.getOrNull(1)?.toIntOrNull() ?: 0)
             .setTitleText(title)
             .build()
 
         picker.addOnPositiveButtonClickListener {
             val display = String.format(Locale.US, "%02d:%02d", picker.hour, picker.minute)
-            val dbTime = "$display:00"
-            onPicked(display, dbTime)
+            onPicked(display, "$display:00")
         }
-
         picker.show(parentFragmentManager, "RATE_TIME_PICKER")
     }
 
+    // Method ini digunakan untuk menyimpan data perangkat, perubahan tarif, serta foto baru secara berurutan ke repository.
     private fun saveAllData(deviceData: DeviceModel) {
         binding.btnSaveDevice.isEnabled = false
         binding.btnSaveDevice.text = "Menyimpan..."
 
         lifecycleScope.launch {
-            // 1. Insert atau Update tabel devices
             val deviceResult = if (existingDevice == null) {
                 deviceRepository.addDevice(deviceData)
             } else {
                 deviceRepository.updateDevice(existingDevice.id, deviceData)
             }
+            if (deviceResult is Result.Error) return@launch showError(deviceResult.message)
 
-            if (deviceResult is Result.Error) {
-                showError(deviceResult.message)
-                return@launch
-            }
+            val savedDeviceId = (deviceResult as Result.Success).data.id ?: existingDevice?.id
+            if (savedDeviceId.isNullOrEmpty()) return@launch showError("ID perangkat tidak ditemukan")
 
-            val savedDeviceId = (deviceResult as Result.Success).data.id
-                ?: existingDevice?.id
-
-            if (savedDeviceId.isNullOrEmpty()) {
-                showError("ID perangkat tidak ditemukan")
-                return@launch
-            }
-
-            // 2. Hapus shift tarif lama yang dibuang owner
             for (rateId in deletedRateIds.toList()) {
                 val delResult = deviceRepository.deleteDeviceRate(rateId)
-                if (delResult is Result.Error) {
-                    showError("Gagal menghapus tarif lama: ${delResult.message}")
-                    return@launch
-                }
+                if (delResult is Result.Error) return@launch showError("Gagal menghapus tarif lama: ${delResult.message}")
                 deletedRateIds.remove(rateId)
             }
 
-            // 3. Simpan shift baru & perbarui shift yang diubah
             for (i in draftRates.indices) {
                 val rate = draftRates[i].copy(deviceId = savedDeviceId)
                 if (rate.id == null) {
                     val addResult = deviceRepository.addDeviceRate(rate)
-                    if (addResult is Result.Error) {
-                        showError("Gagal menyimpan tarif '${rate.rateName}': ${addResult.message}")
-                        return@launch
-                    }
-                    // Simpan ID hasil insert ke draftRates agar tidak duplikat jika retry
+                    if (addResult is Result.Error) return@launch showError("Gagal menyimpan tarif '${rate.rateName}': ${addResult.message}")
                     draftRates[i] = (addResult as Result.Success).data
                 } else {
                     val updateResult = deviceRepository.updateDeviceRate(rate.id, rate)
-                    if (updateResult is Result.Error) {
-                        showError("Gagal memperbarui tarif '${rate.rateName}': ${updateResult.message}")
-                        return@launch
-                    }
+                    if (updateResult is Result.Error) return@launch showError("Gagal memperbarui tarif '${rate.rateName}': ${updateResult.message}")
                 }
             }
 
-            // 4. Upload foto baru jika dipilih
             selectedImageUri?.let { uri ->
-                val bytes = ImageCompressor.compressUri(requireContext(), uri)
-                if (bytes != null) {
-                    val imgResult = deviceRepository.addDeviceImage(
-                        deviceId = savedDeviceId,
-                        imageBytes = bytes,
-                        isPrimary = true
-                    )
-                    if (imgResult is Result.Error) {
-                        showError("Perangkat & tarif tersimpan, tapi foto gagal diunggah: ${imgResult.message}")
-                        onSaved()
-                        dismiss()
-                        return@launch
-                    }
+                val bytes = ImageCompressor.compressUri(requireContext(), uri) ?: return@let
+                val imgResult = deviceRepository.addDeviceImage(deviceId = savedDeviceId, imageBytes = bytes, isPrimary = true)
+                if (imgResult is Result.Error) {
+                    showError("Perangkat & tarif tersimpan, tapi foto gagal diunggah: ${imgResult.message}")
+                    onSaved()
+                    dismiss()
+                    return@launch
                 }
             }
 
@@ -372,12 +302,14 @@ class DeviceFormFragment(
         }
     }
 
+    // Method ini digunakan untuk mengubah nominal angka menjadi format mata uang Rupiah tanpa angka desimal.
     private fun formatRupiah(amount: Int): String {
         val format = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
         format.maximumFractionDigits = 0
         return format.format(amount)
     }
 
+    // Method ini digunakan untuk menampilkan pesan kesalahan dan mengaktifkan kembali tombol simpan ketika proses penyimpanan gagal.
     private fun showError(message: String) {
         if (!isAdded) return
         binding.btnSaveDevice.isEnabled = true
@@ -385,6 +317,7 @@ class DeviceFormFragment(
         Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
     }
 
+    // Method ini digunakan untuk membersihkan View Binding ketika tampilan Bottom Sheet dihancurkan agar mencegah kebocoran memori.
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

@@ -10,16 +10,18 @@ import androidx.fragment.app.Fragment
 import com.example.mrs_tango.R
 import com.example.mrs_tango.core.base.BaseDrawerActivity
 import com.example.mrs_tango.customer.profile.CustomerProfileFragment
-import com.example.mrs_tango.customer.booking.history.BookingHistoryFragment
 import com.example.mrs_tango.customer.home.HomeFragment
 import com.example.mrs_tango.customer.schedule.ScheduleFragment
 import com.example.mrs_tango.databinding.ActivityCustomerBinding
 import androidx.core.graphics.Insets
+import com.example.mrs_tango.customer.fnb.FnbCatalogFragment
+import com.example.mrs_tango.customer.transaction.TransactionHistoryFragment
 
 class CustomerActivity : BaseDrawerActivity() {
 
     private lateinit var binding: ActivityCustomerBinding
 
+    // Menginisialisasi layout edge-to-edge, inset sistem, drawer, dan navigasi utama saat Activity dibuat.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -35,7 +37,6 @@ class CustomerActivity : BaseDrawerActivity() {
             params.rightMargin = systemBars.right
             v.layoutParams = params
 
-            // Inset atas sudah dipakai DrawerLayout; teruskan inset bawah saja untuk BottomNavigationView
             WindowInsetsCompat.Builder(insets)
                 .setInsets(
                     WindowInsetsCompat.Type.systemBars(),
@@ -44,10 +45,8 @@ class CustomerActivity : BaseDrawerActivity() {
                 .build()
         }
 
-        // 1. Wajib dipanggil tepat setelah setContentView & sebelum replaceFragment
         initDrawer(binding.drawerLayout, binding.navigationView)
 
-        // 2. Aman dari crash jika id "main" berubah saat dibungkus DrawerLayout
         findViewById<View>(R.id.main)?.let { mainView ->
             ViewCompat.setOnApplyWindowInsetsListener(mainView) { v, insets ->
                 val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -56,7 +55,6 @@ class CustomerActivity : BaseDrawerActivity() {
             }
         }
 
-        // 3. Listener Bottom Navigation (cukup satu kali, yang dobel dihapus)
         binding.bottomNavView.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.home -> {
@@ -64,7 +62,7 @@ class CustomerActivity : BaseDrawerActivity() {
                     true
                 }
                 R.id.schedule -> {
-                    replaceFragment(ScheduleFragment()) // atau BookingHistoryFragment()
+                    replaceFragment(ScheduleFragment())
                     true
                 }
                 R.id.profile -> {
@@ -74,8 +72,6 @@ class CustomerActivity : BaseDrawerActivity() {
                 else -> false
             }
         }
-
-        // 4. Muat HomeFragment hanya saat pertama kali Activity dibuat
         if (savedInstanceState == null) {
             replaceFragment(HomeFragment())
         }
@@ -87,13 +83,20 @@ class CustomerActivity : BaseDrawerActivity() {
             .commit()
     }
 
+    // Mengarahkan tampilan ke fragment atau tab navigasi sesuai item menu drawer yang dipilih.
     override fun onDrawerItemSelected(itemId: Int) {
         when (itemId) {
             R.id.nav_home -> {
                 binding.bottomNavView.selectedItemId = R.id.home
             }
             R.id.nav_booking_history -> {
-                replaceFragment(BookingHistoryFragment())
+                binding.bottomNavView.selectedItemId = R.id.schedule
+            }
+            R.id.nav_fnb_catalog -> {
+                replaceFragment(FnbCatalogFragment())
+            }
+            R.id.nav_transactions -> {
+                replaceFragment(TransactionHistoryFragment())
             }
             R.id.nav_profile -> {
                 binding.bottomNavView.selectedItemId = R.id.profile

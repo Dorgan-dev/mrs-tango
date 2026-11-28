@@ -32,14 +32,14 @@ data class DeviceDetailsModel(
     @SerialName("updated_at")
     val updatedAt: String? = null,
     @SerialName("device_images")
-    val images: List<DeviceImageModel> = emptyList(),
+    val images: List<DeviceImageModel>? = emptyList(),
     @SerialName("device_rates")
-    val rates: List<DeviceRateModel> = emptyList()
+    val rates: List<DeviceRateModel>? = emptyList()
 ) : java.io.Serializable {
 
     val primaryImageUrl: String?
-        get() = images.firstOrNull { it.isPrimary }?.imageUrl
-            ?: images.firstOrNull()?.imageUrl
+        get() = images?.firstOrNull { it.isPrimary }?.imageUrl
+            ?: images?.firstOrNull()?.imageUrl
             ?: legacyImageUrl
 
     val displayName: String
@@ -47,7 +47,7 @@ data class DeviceDetailsModel(
 
     // Daftar seluruh tarif yang aktif milik perangkat ini
     val activeRates: List<DeviceRateModel>
-        get() = rates.filter { it.isActive }
+        get() = rates?.filter { it.isActive } ?: emptyList()
 
     // Tarif yang berlaku pada jam sekarang
     val activeRate: DeviceRateModel?
