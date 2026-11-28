@@ -23,7 +23,7 @@ class DeviceRepository(
 
     // CRUD data perangkat pada tabel devices
 
-    // Mengambil seluruh data dasar perangkat dari tabel devices tanpa relasi foto dan tarif.
+    // Method ini digunakan untuk mengambil seluruh data dasar perangkat dari tabel devices tanpa menyertakan relasi foto dan tarif.
     suspend fun getAllDevices(): Result<List<DeviceModel>> {
         return withContext(Dispatchers.IO) {
             try {
@@ -41,7 +41,7 @@ class DeviceRepository(
         }
     }
 
-    // Mengambil seluruh perangkat beserta relasi foto dan daftar tarif shift dalam satu query.
+    // Method ini digunakan untuk mengambil seluruh data perangkat beserta relasi foto dan daftar tarif shift dari Supabase.
     suspend fun getDevicesWithDetails(): Result<List<DeviceDetailsModel>> {
         return withContext(Dispatchers.IO) {
             try {
@@ -60,7 +60,7 @@ class DeviceRepository(
         }
     }
 
-    // Mengambil detail lengkap perangkat berdasarkan ID beserta galeri foto dan seluruh tarifnya.
+    // Method ini digunakan untuk mengambil detail satu perangkat berdasarkan ID beserta seluruh data foto dan tarif yang terkait.
     suspend fun getDeviceByIdWithDetails(deviceId: String): Result<DeviceDetailsModel> {
         return withContext(Dispatchers.IO) {
             try {
@@ -79,63 +79,89 @@ class DeviceRepository(
         }
     }
 
-    // Menambahkan perangkat baru dan mengembalikan data hasil insert termasuk ID UUID dari Supabase.
-    suspend fun addDevice(device: DeviceModel): Result<DeviceModel> {
+    // Method ini digunakan untuk menambahkan perangkat baru ke database sekaligus mencatat aktivitas penambahannya ke tabel device_logs.
+    suspend fun addDevice(device: DeviceModel, actorId: String? = null): Result<DeviceModel> {
         return withContext(Dispatchers.IO) {
             try {
-                val newDevice = device.copy(
-                    id = null,
-                    createdAt = null,
-                    updatedAt = null
-                )
-
-                val result = SupabaseClient.client
-                    .from(devicesTable)
-                    .insert(newDevice) {
-                        select()
-                    }
+                val inserted = SupabaseClient.client.from("devices")
+                    .insert(device) { select() }
                     .decodeSingle<DeviceModel>()
 
-                Result.Success(result)
+                inserted.id?.let { newId ->
+                    insertDeviceLog(
+                        deviceId = newId,
+                        actorId = actorId,
+                        fromStatus = "new",
+                        toStatus = inserted.status ?: "available",
+                        note = "Unit baru ditambahkan"
+                    )
+                }
+                Result.Success(inserted)
             } catch (e: Exception) {
-                Result.Error(e.message ?: "Gagal menambahkan perangkat")
+                val message = if (e.message?.contains("23505") == true || e.message?.contains("unique", true) == true) {
+                    "Serial Number konsol atau TV sudah digunakan perangkat lain"
+                } else {
+                    e.message ?: "Gagal menambahkan perangkat"
+                }
+                Result.Error(message)
             }
         }
     }
 
-    // Memperbarui informasi spesifikasi dan status perangkat berdasarkan ID perangkat.
+    // Method ini digunakan untuk memperbarui informasi perangkat dan mencatat perubahan status ke tabel device_logs jika status mengalami perubahan.
     suspend fun updateDevice(
         deviceId: String,
-        updatedDevice: DeviceModel
+        device: DeviceModel,
+        oldStatus: String,
+        actorId: String? = null,
+        statusNote: String? = null
     ): Result<DeviceModel> {
         return withContext(Dispatchers.IO) {
             try {
+                val newStatus = device.status ?: "available"
+
                 val result = SupabaseClient.client
                     .from(devicesTable)
                     .update({
-                        set("name", updatedDevice.name)
-                        set("consol_type", updatedDevice.consoleType)
-                        set("console_sn", updatedDevice.consoleSn)
-                        set("tv_name", updatedDevice.tvName)
-                        set("tv_sn", updatedDevice.tvSn)
-                        set("description", updatedDevice.tvSn) //ini kolom baru
-                        set("tv_ip_address", updatedDevice.tvIpAddress)
-                        set("tv_mac_address", updatedDevice.tvMacAddress)
-                        set("status", updatedDevice.status)
+                        set("name", device.name)
+                        set("consol_type", device.consoleType)
+                        set("console_sn", device.consoleSn)
+                        set("tv_name", device.tvName)
+                        set("tv_sn", device.tvSn)
+                        set("description", device.description)
+                        set("tv_ip_address", device.tvIpAddress)
+                        set("tv_mac_address", device.tvMacAddress)
+                        set("status", newStatus)
                     }) {
                         filter { eq("id", deviceId) }
                         select()
                     }
                     .decodeSingle<DeviceModel>()
 
+                // Catat otomatis ke device_logs hanya jika status perangkat berubah
+                if (!oldStatus.equals(newStatus, ignoreCase = true)) {
+                    insertDeviceLog(
+                        deviceId = deviceId,
+                        actorId = actorId,
+                        fromStatus = oldStatus,
+                        toStatus = newStatus,
+                        note = statusNote?.ifBlank { null } ?: "Status diubah oleh Owner"
+                    )
+                }
+
                 Result.Success(result)
             } catch (e: Exception) {
-                Result.Error(e.message ?: "Gagal memperbarui perangkat")
+                val msg = if (e.message?.contains("23505") == true || e.message?.contains("unique", true) == true) {
+                    "Serial Number Konsol atau TV bentrok dengan unit lain"
+                } else {
+                    e.message ?: "Gagal memperbarui perangkat"
+                }
+                Result.Error(msg)
             }
         }
     }
 
-    // Menghapus perangkat berdasarkan ID sekaligus membersihkan seluruh file foto terkait di Supabase Storage.
+    // Method ini digunakan untuk menghapus data perangkat berdasarkan ID sekaligus membersihkan file foto terkait dari Supabase Storage.
     suspend fun deleteDevice(deviceId: String?): Result<Boolean> {
         return withContext(Dispatchers.IO) {
             try {
@@ -174,8 +200,7 @@ class DeviceRepository(
 
     // Manajemen foto perangkat pada tabel device_images dan bucket device-images
 
-    // Mengunggah foto terkompresi ke Supabase Storage lalu menyimpan URL-nya ke database.
-    // Jika isPrimary bernilai true, foto primary sebelumnya akan dinonaktifkan.
+    // Method ini digunakan untuk mengunggah foto perangkat ke Supabase Storage dan menyimpan informasi foto tersebut ke tabel device_images.
     suspend fun addDeviceImage(
         deviceId: String,
         imageBytes: ByteArray,
@@ -231,7 +256,7 @@ class DeviceRepository(
         }
     }
 
-    // Menghapus satu foto dari database beserta file fisiknya di Storage jika storagePath tersedia.
+    // Method ini digunakan untuk menghapus data foto berdasarkan ID dari database sekaligus menghapus file fisiknya dari Supabase Storage.
     suspend fun deleteDeviceImage(
         imageId: String,
         storagePath: String?
@@ -257,7 +282,7 @@ class DeviceRepository(
 
     // Manajemen tarif berbasis waktu pada tabel device_rates
 
-    // Menambahkan satu slot tarif baru tanpa menonaktifkan slot tarif lainnya milik perangkat yang sama.
+    // Method ini digunakan untuk menambahkan tarif shift baru ke tabel device_rates tanpa menonaktifkan tarif lainnya.
     suspend fun addDeviceRate(rate: DeviceRateModel): Result<DeviceRateModel> {
         return withContext(Dispatchers.IO) {
             try {
@@ -274,7 +299,30 @@ class DeviceRepository(
         }
     }
 
-    // Memperbarui nama shift, harga per jam, rentang waktu, atau status aktif berdasarkan ID tarif.
+    // Method ini digunakan untuk menyimpan riwayat perubahan status perangkat ke tabel device_logs sebagai catatan aktivitas.
+    private suspend fun insertDeviceLog(
+        deviceId: String,
+        actorId: String?,
+        fromStatus: String,
+        toStatus: String,
+        note: String
+    ) {
+        try {
+            SupabaseClient.client.from("device_logs").insert(
+                mapOf(
+                    "device_id" to deviceId,
+                    "actor_id" to actorId,
+                    "from_status" to fromStatus,
+                    "to_status" to toStatus,
+                    "note" to note
+                )
+            )
+        } catch (_: Exception) {
+            // Non-blocking audit log
+        }
+    }
+
+    // Method ini digunakan untuk memperbarui informasi tarif perangkat seperti nama shift, harga per jam, rentang waktu, dan status aktif.
     suspend fun updateDeviceRate(
         rateId: String,
         rate: DeviceRateModel
@@ -300,7 +348,7 @@ class DeviceRepository(
         }
     }
 
-    // Menghapus satu slot tarif perangkat dari tabel device_rates berdasarkan ID tarif.
+    // Method ini digunakan untuk menghapus satu data tarif perangkat dari tabel device_rates berdasarkan ID tarif.
     suspend fun deleteDeviceRate(rateId: String): Result<Boolean> {
         return withContext(Dispatchers.IO) {
             try {

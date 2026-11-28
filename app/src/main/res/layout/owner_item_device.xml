@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="6dp"
     app:cardBackgroundColor="@android:color/white"
     app:cardCornerRadius="12dp"
     app:cardElevation="2dp"
-    app:strokeColor="#D5E8D4"
+    app:strokeColor="#E0E0E0"
     app:strokeWidth="1dp">
 
     <LinearLayout
@@ -17,57 +17,83 @@
         android:orientation="vertical"
         android:padding="14dp">
 
-        <!-- Baris Atas: Nama Unit & Badge Status -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/deviceName"
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="0dp">
+
+                <ImageView
+                    android:id="@+id/ivDeviceThumb"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="Foto perangkat"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_launcher_background" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="12dp"
                 android:layout_weight="1"
-                android:textColor="#1B1B1B"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                tools:text="Unit 01 - VIP Room" />
+                android:orientation="vertical">
 
-            <!-- Badge Status -->
+                <TextView
+                    android:id="@+id/deviceName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PS5 Unit 1"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/consoleInfo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Konsol: PS5 (SN: ABC12345)"
+                    android:textColor="#616161"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/tvInfo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="TV: Samsung 43 • IP: 192.168.1.10"
+                    android:textColor="#757575"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:id="@+id/deviceRatesSummary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Siang: Rp 15.000 | Malam: Rp 18.000"
+                    android:textColor="@color/dark_green"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
             <TextView
-                android:id="@+id/deviceStatus"
+                android:id="@+id/statusBadge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_status_badge"
-                android:backgroundTint="#E8F5E9"
-                android:paddingHorizontal="10dp"
+                android:paddingHorizontal="8dp"
                 android:paddingVertical="4dp"
-                android:textColor="@color/dark_green"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                tools:text="Available" />
+                android:text="AVAILABLE"
+                android:textSize="10sp"
+                android:textStyle="bold" />
         </LinearLayout>
-
-        <!-- Info Konsol -->
-        <TextView
-            android:id="@+id/consoleInfo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:textColor="#424242"
-            android:textSize="13sp"
-            tools:text="Konsol: PS5 Disc Edition (SN: 882910293)" />
-
-        <!-- Info TV & Jaringan -->
-        <TextView
-            android:id="@+id/tvInfo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:textColor="#616161"
-            android:textSize="12sp"
-            tools:text="TV: Samsung 55&quot; • IP: 192.168.1.101" />
 
         <View
             android:layout_width="match_parent"
@@ -75,7 +101,7 @@
             android:layout_marginVertical="10dp"
             android:background="#EEEEEE" />
 
-        <!-- Tombol Aksi: Edit & Delete -->
+        <!-- Tombol Aksi Cepat -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -83,38 +109,48 @@
             android:orientation="horizontal">
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnEdit"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:id="@+id/btnManagePhotos"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
-                android:layout_height="36dp"
-                android:layout_marginEnd="8dp"
-                android:insetTop="0dp"
-                android:insetBottom="0dp"
-                android:text="Edit"
-                android:textAllCaps="false"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:paddingHorizontal="8dp"
+                android:text="Foto (0)"
                 android:textColor="@color/dark_green"
-                android:textSize="12sp"
-                app:icon="@android:drawable/ic_menu_edit"
-                app:iconSize="16dp"
-                app:iconTint="@color/dark_green"
-                app:strokeColor="@color/dark_green" />
+                android:textSize="12sp" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnDelete"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:id="@+id/btnManageRates"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
-                android:layout_height="36dp"
-                android:insetTop="0dp"
-                android:insetBottom="0dp"
-                android:text="Hapus"
-                android:textAllCaps="false"
-                android:textColor="#D32F2F"
-                android:textSize="12sp"
-                app:icon="@android:drawable/ic_menu_delete"
-                app:iconSize="16dp"
-                app:iconTint="#D32F2F"
-                app:strokeColor="#D32F2F" />
-        </LinearLayout>
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:paddingHorizontal="8dp"
+                android:text="Tarif (0)"
+                android:textColor="@color/dark_green"
+                android:textSize="12sp" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEditDevice"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:paddingHorizontal="8dp"
+                android:text="Edit"
+                android:textColor="#1565C0"
+                android:textSize="12sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDeleteDevice"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:paddingHorizontal="8dp"
+                android:text="Hapus"
+                android:textColor="#C62828"
+                android:textSize="12sp" />
+        </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

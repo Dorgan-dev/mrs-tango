@@ -21,6 +21,10 @@
             android:id="@+id/nav_profile"
             android:icon="@android:drawable/ic_menu_myplaces"
             android:title="Profil Saya" />
+        <item
+            android:id="@+id/nav_log_device"
+            android:icon="@android:drawable/ic_menu_myplaces"
+            android:title="Log Perangkat" />
     </group>
 
     <item android:title="Akun">

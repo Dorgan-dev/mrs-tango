@@ -39,15 +39,22 @@ class DeviceFormFragment(
 
     private var _binding: FragmentDeviceFormBinding? = null
     private val binding get() = _binding!!
-    private var selectedImageUri: Uri? = null
+    private var selectedImageUris = mutableListOf<Uri>()
     private val draftRates = mutableListOf<DeviceRateModel>()
     private val deletedRateIds = mutableListOf<String>()
 
-    private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        if (uri != null) {
-            selectedImageUri = uri
-            binding.ivDevicePreview.load(uri) { crossfade(true) }
-            binding.tvPickImageHint.text = "Ganti foto"
+    private val pickMedia = registerForActivityResult(
+        ActivityResultContracts.PickMultipleVisualMedia(5)
+    ) { uris ->
+        if (uris.isNotEmpty()) {
+            selectedImageUris.clear()
+            selectedImageUris.addAll(uris)
+            binding.ivDevicePreview.load(uris.first()) { crossfade(true) }
+            binding.tvPickImageHint.text = if (uris.size > 1) {
+                "${uris.size} foto dipilih (ketuk untuk ganti)"
+            } else {
+                "1 foto dipilih (ketuk untuk ganti)"
+            }
         }
     }
 
@@ -79,7 +86,7 @@ class DeviceFormFragment(
         )
     }
 
-    // Method ini digunakan untuk mengisi form dengan data perangkat dan tarif yang sudah tersimpan atau menampilkan form kosong untuk perangkat baru.
+    // Method ini digunakan untuk mengisi form dengan data perangkat yang akan diedit atau menampilkan form kosong untuk penambahan perangkat baru.
     private fun populateExistingData() {
         if (existingDevice != null) {
             binding.tvFormTitle.text = "Edit Perangkat"
@@ -110,7 +117,7 @@ class DeviceFormFragment(
         renderRateList()
     }
 
-    // Method ini digunakan untuk mengatur aksi pemilihan foto, penambahan tarif, serta validasi dan penyimpanan data perangkat.
+    // Method ini digunakan untuk mengatur aksi pemilihan foto, penambahan tarif, validasi input, dan penyimpanan data perangkat.
     private fun setupListeners() {
         binding.cardSelectImage.setOnClickListener {
             pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
@@ -120,8 +127,19 @@ class DeviceFormFragment(
         }
         binding.btnSaveDevice.setOnClickListener {
             val name = binding.etName.text.toString().trim()
+            val consoleSn = binding.etConsoleSn.text.toString().trim()
+            val tvSn = binding.etTvSn.text.toString().trim()
+
             if (name.isEmpty()) {
                 binding.etName.error = "Nama unit tidak boleh kosong"
+                return@setOnClickListener
+            }
+            if (consoleSn.isEmpty()) {
+                binding.etConsoleSn.error = "Serial Number konsol wajib diisi"
+                return@setOnClickListener
+            }
+            if (tvSn.isEmpty()) {
+                binding.etTvSn.error = "Serial Number TV wajib diisi"
                 return@setOnClickListener
             }
             if (draftRates.isEmpty()) {
@@ -135,9 +153,9 @@ class DeviceFormFragment(
                     name = name,
                     status = binding.actvStatus.text.toString().trim().ifEmpty { "available" },
                     consoleType = binding.actvConsoleType.text.toString().trim().ifEmpty { null },
-                    consoleSn = binding.etConsoleSn.text.toString().trim().ifEmpty { null },
+                    consoleSn = consoleSn,
                     tvName = binding.etTvName.text.toString().trim().ifEmpty { null },
-                    tvSn = binding.etTvSn.text.toString().trim().ifEmpty { null },
+                    tvSn = tvSn,
                     tvIpAddress = binding.etTvIp.text.toString().trim().ifEmpty { null },
                     tvMacAddress = binding.etTvMac.text.toString().trim().ifEmpty { null }
                 )
@@ -145,7 +163,7 @@ class DeviceFormFragment(
         }
     }
 
-    // Method ini digunakan untuk menampilkan daftar tarif perangkat beserta informasi dan tombol edit maupun hapus.
+    // Method ini digunakan untuk menampilkan daftar tarif perangkat beserta informasi tarif dan tombol untuk mengedit atau menghapusnya.
     private fun renderRateList() {
         binding.llRatesContainer.removeAllViews()
         binding.tvEmptyRates.isVisible = draftRates.isEmpty()
@@ -165,7 +183,7 @@ class DeviceFormFragment(
         }
     }
 
-    // Method ini digunakan untuk menampilkan dialog tambah atau edit tarif serta memvalidasi data tarif sebelum disimpan ke daftar sementara.
+    // Method ini digunakan untuk menampilkan dialog penambahan atau pengeditan shift tarif serta memvalidasi data sebelum dimasukkan ke daftar sementara.
     private fun showRateDialog(existingRate: DeviceRateModel?, editIndex: Int?) {
         val dialogBinding = DialogRateFormBinding.inflate(layoutInflater)
         var selectedStartTime: String? = existingRate?.effectiveFrom
@@ -232,7 +250,7 @@ class DeviceFormFragment(
         }
     }
 
-    // Method ini digunakan untuk menampilkan pemilih waktu dan mengembalikan waktu yang dipilih dalam format tampilan dan format database.
+    // Method ini digunakan untuk menampilkan pemilih waktu dalam format 24 jam dan mengembalikan hasil pilihan dalam format tampilan serta format database.
     private fun openTimePicker(title: String, currentDbTime: String?, onPicked: (displayTime: String, dbTime: String) -> Unit) {
         val parts = currentDbTime?.split(":")
         val picker = MaterialTimePicker.Builder()
@@ -249,25 +267,48 @@ class DeviceFormFragment(
         picker.show(parentFragmentManager, "RATE_TIME_PICKER")
     }
 
-    // Method ini digunakan untuk menyimpan data perangkat, perubahan tarif, serta foto baru secara berurutan ke repository.
+    // Method ini digunakan untuk menyimpan data perangkat, mengelola perubahan tarif, dan mengunggah beberapa foto perangkat ke repository secara berurutan.
     private fun saveAllData(deviceData: DeviceModel) {
         binding.btnSaveDevice.isEnabled = false
         binding.btnSaveDevice.text = "Menyimpan..."
 
-        lifecycleScope.launch {
+        val actorId = context
+            ?.getSharedPreferences("user_pref", android.content.Context.MODE_PRIVATE)
+            ?.getString("user_id", null)
+
+        viewLifecycleOwner.lifecycleScope.launch {
             val deviceResult = if (existingDevice == null) {
-                deviceRepository.addDevice(deviceData)
+                deviceRepository.addDevice(deviceData, actorId)
             } else {
-                deviceRepository.updateDevice(existingDevice.id, deviceData)
+                val targetId = existingDevice.id
+                if (targetId.isNullOrEmpty()) {
+                    showError("ID perangkat tidak ditemukan")
+                    return@launch
+                }
+                deviceRepository.updateDevice(
+                    deviceId = targetId,
+                    device = deviceData,
+                    oldStatus = existingDevice.status ?: "available",
+                    actorId = actorId
+                )
             }
-            if (deviceResult is Result.Error) return@launch showError(deviceResult.message)
+            if (deviceResult is Result.Error) {
+                showError(deviceResult.message)
+                return@launch
+            }
 
             val savedDeviceId = (deviceResult as Result.Success).data.id ?: existingDevice?.id
-            if (savedDeviceId.isNullOrEmpty()) return@launch showError("ID perangkat tidak ditemukan")
+            if (savedDeviceId.isNullOrEmpty()) {
+                showError("ID perangkat tidak ditemukan")
+                return@launch
+            }
 
             for (rateId in deletedRateIds.toList()) {
                 val delResult = deviceRepository.deleteDeviceRate(rateId)
-                if (delResult is Result.Error) return@launch showError("Gagal menghapus tarif lama: ${delResult.message}")
+                if (delResult is Result.Error) {
+                    showError("Gagal menghapus tarif lama: ${delResult.message}")
+                    return@launch
+                }
                 deletedRateIds.remove(rateId)
             }
 
@@ -275,27 +316,48 @@ class DeviceFormFragment(
                 val rate = draftRates[i].copy(deviceId = savedDeviceId)
                 if (rate.id == null) {
                     val addResult = deviceRepository.addDeviceRate(rate)
-                    if (addResult is Result.Error) return@launch showError("Gagal menyimpan tarif '${rate.rateName}': ${addResult.message}")
+                    if (addResult is Result.Error) {
+                        showError("Gagal menyimpan tarif '${rate.rateName}': ${addResult.message}")
+                        return@launch
+                    }
                     draftRates[i] = (addResult as Result.Success).data
                 } else {
                     val updateResult = deviceRepository.updateDeviceRate(rate.id, rate)
-                    if (updateResult is Result.Error) return@launch showError("Gagal memperbarui tarif '${rate.rateName}': ${updateResult.message}")
+                    if (updateResult is Result.Error) {
+                        showError("Gagal memperbarui tarif '${rate.rateName}': ${updateResult.message}")
+                        return@launch
+                    }
                 }
             }
 
-            selectedImageUri?.let { uri ->
-                val bytes = ImageCompressor.compressUri(requireContext(), uri) ?: return@let
-                val imgResult = deviceRepository.addDeviceImage(deviceId = savedDeviceId, imageBytes = bytes, isPrimary = true)
-                if (imgResult is Result.Error) {
-                    showError("Perangkat & tarif tersimpan, tapi foto gagal diunggah: ${imgResult.message}")
-                    onSaved()
-                    dismiss()
-                    return@launch
-                }
-            }
+            if (selectedImageUris.isNotEmpty()) {
+                val hasPrimaryBefore = existingDevice?.primaryImageUrl != null
+                val uploadedUris = mutableListOf<Uri>()
 
-            if (isAdded) {
-                Toast.makeText(requireContext(), "Perangkat berhasil disimpan", Toast.LENGTH_SHORT).show()
+                for ((index, uri) in selectedImageUris.withIndex()) {
+                    val ctx = context ?: return@launch
+                    val bytes = ImageCompressor.compressUri(ctx, uri) ?: continue
+                    val setPrimary = !hasPrimaryBefore && index == 0
+                    val imgResult = deviceRepository.addDeviceImage(
+                        deviceId = savedDeviceId,
+                        imageBytes = bytes,
+                        isPrimary = setPrimary
+                    )
+                    if (imgResult is Result.Error) {
+                        selectedImageUris.removeAll(uploadedUris)
+                        val msg = "Perangkat & tarif tersimpan, tapi sebagian foto gagal diunggah: ${imgResult.message}"
+                        context?.let { Toast.makeText(it, msg, Toast.LENGTH_LONG).show() }
+                        onSaved()
+                        dismiss()
+                        return@launch
+                    }
+                    uploadedUris.add(uri)
+                }
+                selectedImageUris.removeAll(uploadedUris)
+            }
+            val ctx = context
+            if (isAdded && ctx != null) {
+                Toast.makeText(ctx, "Perangkat berhasil disimpan", Toast.LENGTH_SHORT).show()
                 onSaved()
                 dismiss()
             }
@@ -309,7 +371,7 @@ class DeviceFormFragment(
         return format.format(amount)
     }
 
-    // Method ini digunakan untuk menampilkan pesan kesalahan dan mengaktifkan kembali tombol simpan ketika proses penyimpanan gagal.
+    // Method ini digunakan untuk menampilkan pesan kesalahan dan mengaktifkan kembali tombol simpan ketika proses penyimpanan mengalami kegagalan.
     private fun showError(message: String) {
         if (!isAdded) return
         binding.btnSaveDevice.isEnabled = true
@@ -317,7 +379,7 @@ class DeviceFormFragment(
         Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
     }
 
-    // Method ini digunakan untuk membersihkan View Binding ketika tampilan Bottom Sheet dihancurkan agar mencegah kebocoran memori.
+    // Method ini digunakan untuk membersihkan referensi View Binding ketika tampilan Bottom Sheet dihancurkan agar mencegah kebocoran memori.
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

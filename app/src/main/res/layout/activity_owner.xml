@@ -12,11 +12,22 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- 1. Ganti FrameLayout dengan ViewPager2 agar bisa di-swipe -->
+        <!-- 1. ViewPager2 untuk tab utama -->
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/view_pager"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@+id/bottom_nav_view"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- 2. Container untuk Fragment sekunder dari Side Drawer (seperti DeviceLogFragment) -->
+        <FrameLayout
+            android:id="@+id/fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@+id/bottom_nav_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
