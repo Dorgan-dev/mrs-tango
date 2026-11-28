@@ -10,6 +10,7 @@ import com.example.mrs_tango.core.base.BaseDrawerActivity
 import com.example.mrs_tango.customer.booking.history.BookingHistoryFragment
 import com.example.mrs_tango.databinding.ActivityOwnerBinding
 import com.example.mrs_tango.owner.device.DeviceLogFragment
+import com.example.mrs_tango.owner.fnb.OwnerFnbFragment
 
 class OwnerActivity : BaseDrawerActivity() {
 
@@ -74,6 +75,7 @@ class OwnerActivity : BaseDrawerActivity() {
             R.id.drawer_owner_users -> selectBottomNav(R.id.cashier)
             R.id.drawer_owner_logs, R.id.nav_log_device -> replaceFragment(DeviceLogFragment())
             R.id.nav_booking_history -> replaceFragment(BookingHistoryFragment())
+            R.id.nav_fnb_catalog -> replaceFragment(OwnerFnbFragment())
         }
     }
 
